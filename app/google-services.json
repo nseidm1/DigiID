@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "124328747703",
+    "firebase_url": "https://digiid-a9a94.firebaseio.com",
+    "project_id": "digiid-a9a94",
+    "storage_bucket": "digiid-a9a94.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124328747703:android:812bae6d3eb6f9c3",
+        "android_client_info": {
+          "package_name": "com.noahseidman.digiid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124328747703-pk9rh550brcvc6b53gpqsp69vm9obrt0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noahseidman.digiid",
+            "certificate_hash": "cbe59a56d6e80b162f6fc48b5494da4052e7265d"
+          }
+        },
+        {
+          "client_id": "124328747703-6l1v2t2a8sf257qsdshhs954kpi46nji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH2cDuxnjke33d75l7u-P9jhhbZkH_Yso"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124328747703-6l1v2t2a8sf257qsdshhs954kpi46nji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

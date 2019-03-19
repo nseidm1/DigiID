@@ -1,0 +1,12 @@
+[submodule "app/src/main/secp/secp256k1"]
+	path = app/src/main/secp/secp256k1
+	url = https://github.com/bitcoin-core/secp256k1.git
+[submodule "app/src/main/jni/digibytewallet-core"]
+	path = app/src/main/jni/digibytewallet-core
+	url = https://github.com/DigiByte-Core/digibytewallet-core.git
+[submodule "digibytewallet-core"]
+	path = digibytewallet-core
+	url = https://github.com/DigiByte-Core/digibytewallet-core.git
+[submodule "secp256k1"]
+	path = secp256k1
+	url = https://github.com/bitcoin-core/secp256k1.git

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.noahseidman.digiid">
+
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" android:required="true"/>
+    <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
+    <uses-permission android:name="android.permission.CAMERA" android:required="true"/>
+    <uses-permission android:name="android.permission.NFC" android:required="false"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:required="false"/>
+
+    <application
+            android:allowBackup="false"
+            android:label="@string/name"
+            android:icon="@drawable/ic_digiid"
+            android:roundIcon="@drawable/ic_digiid"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme"
+            android:name=".Application"
+            tools:replace="android:label,android:allowBackup">
+        <activity android:name=".MainActivity"
+                  android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="digiid"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".QRCodeActivity" android:theme="@style/Theme.AppCompat.Translucent"/>
+    </application>
+
+</manifest>

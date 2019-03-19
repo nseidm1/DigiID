@@ -1,0 +1,25 @@
+<resources>
+    <string name="name">DigiID</string>
+    <string name="TouchSensor">Touch Sensor</string>
+    <string name="AuthRequired">Authentication required</string>
+    <string name="FingerprintSuccess">Fingerprint recognized</string>
+    <string name="FingerprintFailed">Fingerprint not recognized. Please try again.</string>
+    <string name="Cancel">Cancel</string>
+    <string name="ErrorSigning">Error signing transaction</string>
+    <string name="Restore">Restore</string>
+    <string name="Backup">Backup</string>
+    <string name="SaveQR">Save QR</string>
+    <string name="SavedToPictures">Saved to Pictures</string>
+    <string name="SavedToDrive">Saved to Google</string>
+    <string name="BackupFailed">Backup Failed</string>
+    <string name="Options">Options:</string>
+    <string name="Scan">Scan</string>
+    <string name="Image">Image</string>
+    <string name="Restored">Restored</string>
+    <string name="RestoreFailed">Resore Failed</string>
+    <string name="Google">Google</string>
+    <string name="NothingToRestore">Nothing to restore, please backup first</string>
+    <string name="DigiIDSuccess">DigiID Success</string>
+    <string name="Transmitting">Transmitting</string>
+    <string name="Exception">Exception</string>
+</resources>

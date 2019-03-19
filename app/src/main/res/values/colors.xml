@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="background">#191a2a</color>
+    <color name="white">#ffffff</color>
+    <color name="blue">#FF33B5E5</color>
+    <color name="bluetrans">#4f33B5E5</color>
+    <color name="black">#ff000000</color>
+    <color name="gray">#ff787878</color>
+    <color name="light_gray">#ff9d9d9d</color>
+    <color name="gray_shadow">#41484848</color>
+    <color name="extra_light_gray">#D6DAE1</color>
+    <color name="dark_gray">#65696e</color>
+    <color name="almost_black">#303030</color>
+    <color name="dark_blue">#4C98FD</color>
+    <color name="notification_gradient_start">#63BCFF</color>
+    <color name="notification_gradient_end">#378DFD</color>
+    <color name="wallet_orange">#ff8000</color>
+    <color name="black_trans">#b5000000</color>
+    <color name="red_text">#FF5454</color>
+    <color name="green_text">#00BF00</color>
+
+    <color name="logo_gradient_start">#012351</color>
+    <color name="logo_gradient_end">#0066cc</color>
+
+    <color name="import_gradient_start">#76b0fd</color>
+    <color name="import_gradient_end">#4C98FD</color>
+
+    <color name="write_phrase_gradient_end">#0066cc</color>
+
+    <color name="pin_pad_text">#9c9eb9</color>
+    <color name="extra_light_blue_background">#F5F8FA</color>
+
+    <color name="button_primary_normal">#4C98FD</color>
+    <color name="button_secondary">#F5F8FA</color>
+    <color name="button_secondary_text">#232426</color>
+
+    //fingerprint
+    <color name="warning_color">#f04a5d</color>
+    <color name="hint_color">#42000000</color>
+    <color name="success_color">#009688</color>
+
+    //the QR
+
+    //Keyboard
+    <color name="keyboard_text_color">#9c9eb9</color>
+
+</resources>
