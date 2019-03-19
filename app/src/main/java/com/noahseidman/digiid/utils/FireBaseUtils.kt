@@ -28,7 +28,6 @@ class FireBaseUtils {
         fun save(seed: String, context: AppCompatActivity) {
             updateAdId(context, object: OnAdIdUpdateListener {
                 override fun onComplete() {
-
                     val ref = FirebaseFirestore.getInstance().collection("data").
                         document(String(MessageDigest.getInstance("SHA-256").digest(advertisingId!!.toByteArray(Charset.defaultCharset()))))
                     ref.get().addOnSuccessListener { documentSnapshot ->

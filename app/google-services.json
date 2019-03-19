@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "124328747703-avq30nk7er5ham2cgrlkat6mh8an0te6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noahseidman.digiid",
+            "certificate_hash": "2cd0d2a9ca9791a44d46531e96a190bfc7245c3d"
+          }
+        },
+        {
           "client_id": "124328747703-6l1v2t2a8sf257qsdshhs954kpi46nji.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -44,6 +52,37 @@
               "client_type": 3
             }
           ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124328747703:android:7c7f34592188abe4",
+        "android_client_info": {
+          "package_name": "io.digibyte"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124328747703-6l1v2t2a8sf257qsdshhs954kpi46nji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH2cDuxnjke33d75l7u-P9jhhbZkH_Yso"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

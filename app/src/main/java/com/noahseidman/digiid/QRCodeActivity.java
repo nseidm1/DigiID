@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.noahseidman.digiid.databinding.ActivityQrCodeBinding;
 import com.noahseidman.digiid.listeners.ActivityQRCodeCallback;
@@ -144,6 +145,8 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
         if (requestCode == FIREBASE_CODE) {
             if (resultCode == RESULT_OK) {
                 FireBaseUtils.Companion.save(getIntent().getStringExtra(SEED_PHRASE), this);
+            }else {
+                Crashlytics.log("Firebase Auth Failed");
             }
         }
     }

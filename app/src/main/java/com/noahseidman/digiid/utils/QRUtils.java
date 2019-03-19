@@ -26,8 +26,6 @@ import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
 
 public class QRUtils {
-    private static final String TAG = QRUtils.class.getName();
-    public static final int CAMERA_REQUEST_ID = 34;
     public static final int SCANNER_REQUEST = 201;
     public static final int SCANNER_RESTORE = 233;
 

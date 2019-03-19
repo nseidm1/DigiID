@@ -39,7 +39,7 @@ abstract class BaseActivity : AppCompatActivity(), MainActivityCallback,
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when(requestCode) {
-            QRUtils.CAMERA_REQUEST_ID -> {
+            QRUtils.SCANNER_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     handler.postDelayed({
                         val intent = Intent(this, CaptureActivity::class.java)
