@@ -2,10 +2,15 @@ package com.noahseidman.digiid.utils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -15,9 +20,11 @@ import com.crashlytics.android.Crashlytics;
 import com.jniwrappers.BRBIP32Sequence;
 import com.noahseidman.digiid.FragmentFingerprint;
 import com.noahseidman.digiid.FragmentSignal;
+import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.listeners.BRAuthCompletionCallback;
 import com.noahseidman.digiid.models.KeyModel;
+import com.noahseidman.digiid.models.MainActivityDataModel;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -50,11 +57,33 @@ public class DigiID {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public static void digiIDAuthPrompt(@NonNull final AppCompatActivity app, @NonNull String bitID, boolean isDeepLink) {
+    public static void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, MainActivityDataModel keyData) {
         Uri bitUri = Uri.parse(bitID);
         String scheme = "https://";
-        BRAuthCompletionCallback.AuthType type = new BRAuthCompletionCallback.AuthType(bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath());
-        FragmentFingerprint.show(app, null, null, type);
+        if (!FingerprintUiHelper.fingerprintAvailable(context)) {
+            KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+            if (keyguardManager.isKeyguardSecure()) {
+                byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
+                DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(R.string.SecurityRequirementTitle);
+                builder.setIcon(R.drawable.ic_digiid);
+                builder.setMessage(R.string.SecurityRequirementMessage);
+                builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {});
+                builder.setPositiveButton(R.string.Security, (dialog, which) -> {
+                    Intent intent=new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                    context.startActivity(intent);
+                });
+                builder.show();
+            }
+        } else if (FingerprintUiHelper.isFingerprintEnabled(context)) {
+            BRAuthCompletionCallback.AuthType type = new BRAuthCompletionCallback.AuthType(bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath());
+            FragmentFingerprint.show(context, null, null, type);
+        } else {
+            byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
+            DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+        }
     }
 
     public static void digiIDSignAndRespond(@NonNull final Activity app, @NonNull String bitID,

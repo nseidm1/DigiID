@@ -3,13 +3,11 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.noahseidman.digiid">
 
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" android:required="true"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" android:required="false"/>
     <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
     <uses-permission android:name="android.permission.CAMERA" android:required="true"/>
     <uses-permission android:name="android.permission.NFC" android:required="false"/>
     <uses-permission android:name="android.permission.READ_CONTACTS" tools:node="remove" />
-
-    <uses-feature android:name="android.hardware.fingerprint" android:required="true"/>
 
     <application
             android:allowBackup="false"

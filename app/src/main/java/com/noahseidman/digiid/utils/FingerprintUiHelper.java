@@ -16,11 +16,14 @@
 
 package com.noahseidman.digiid.utils;
 
+import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.CancellationSignal;
+import android.preference.PreferenceManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.RequiresApi;
@@ -147,6 +150,23 @@ public class FingerprintUiHelper extends FingerprintManager.AuthenticationCallba
             mIcon.setImageResource(R.drawable.ic_fp_40px);
         }
     };
+
+    public static boolean fingerprintAvailable(Context context) {
+        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        return keyguardManager.isKeyguardSecure();
+    }
+
+    public static boolean isFingerprintEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("fingerprint", true);
+    }
+
+    public static void enableFingerprint(Context context, boolean enable) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("fingerprint", enable);
+        editor.apply();
+    }
 
     public interface Callback {
 

@@ -22,4 +22,8 @@
     <string name="DigiIDSuccess">DigiID Success</string>
     <string name="Transmitting">Transmitting</string>
     <string name="Exception">Exception</string>
+    <string name="RequireFingerprint">Require Fingerprint</string>
+    <string name="SecurityRequirementTitle">Security Requirement</string>
+    <string name="SecurityRequirementMessage">On devices without a fingerprint sensor, it\'s mandatory for the phone to have a password set. Please set a password.</string>
+    <string name="Security">Security</string>
 </resources>

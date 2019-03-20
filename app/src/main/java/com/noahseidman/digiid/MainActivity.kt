@@ -10,6 +10,7 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.util.Log
+import android.widget.CompoundButton
 import androidx.annotation.Nullable
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
@@ -19,12 +20,17 @@ import com.noahseidman.digiid.listeners.BRAuthCompletionCallback
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.models.MainActivityDataModel
 import com.noahseidman.digiid.utils.*
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.util.*
 
 
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
+
+    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        FingerprintUiHelper.enableFingerprint(this, isChecked)
+    }
 
     private val SELECT_IMAGE_RESTORE: Int = 4334
     private val FIREBASE_RESTORE = 32443
@@ -99,6 +105,9 @@ class MainActivity : BaseActivity() {
         }
         processNFC(intent)
         processDeepLink(intent)
+        fingerprint_switch.isEnabled = FingerprintUiHelper.fingerprintAvailable(this)
+        fingerprint_switch.isChecked = fingerprint_switch.isEnabled && FingerprintUiHelper.isFingerprintEnabled(this)
+        fingerprint_switch.setOnCheckedChangeListener(this)
         intent = Intent()
     }
 
@@ -128,7 +137,7 @@ class MainActivity : BaseActivity() {
                         handler.postDelayed({
                             val result = intent?.getStringExtra("SCAN_RESULT")
                             result?.let {
-                                DigiID.digiIDAuthPrompt(this, result, false)
+                                DigiID.digiIDAuthPrompt(this, result, false, keyData)
                             }
                         }, 500)
                     }
@@ -203,7 +212,7 @@ class MainActivity : BaseActivity() {
     private fun processDeepLink(@Nullable intent: Intent?) {
         intent?.data?.let {
             if (DigiID.isBitId(it.toString())) {
-                DigiID.digiIDAuthPrompt(this, it.toString(), true)
+                DigiID.digiIDAuthPrompt(this, it.toString(), true, keyData)
             }
         }
     }
@@ -217,7 +226,7 @@ class MainActivity : BaseActivity() {
             try {
                 val record = String(ndefRecord.payload)
                 if (record.contains("digiid")) {
-                    DigiID.digiIDAuthPrompt(this, record, false)
+                    DigiID.digiIDAuthPrompt(this, record, false, keyData)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
