@@ -29,7 +29,7 @@ import java.util.*
 class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        FingerprintUiHelper.enableFingerprint(this, isChecked)
+        BiometricHelper.enableBiometric(this, isChecked)
     }
 
     private val SELECT_IMAGE_RESTORE: Int = 4334
@@ -105,8 +105,8 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
         processNFC(intent)
         processDeepLink(intent)
-        fingerprint_switch.isEnabled = FingerprintUiHelper.fingerprintAvailable(this)
-        fingerprint_switch.isChecked = fingerprint_switch.isEnabled && FingerprintUiHelper.isFingerprintEnabled(this)
+        fingerprint_switch.isEnabled = BiometricHelper.biometricAvailable(this)
+        fingerprint_switch.isChecked = fingerprint_switch.isEnabled && BiometricHelper.isBiometricEnabled(this)
         fingerprint_switch.setOnCheckedChangeListener(this)
         intent = Intent()
     }

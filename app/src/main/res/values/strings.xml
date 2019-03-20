@@ -1,9 +1,10 @@
 <resources>
     <string name="name">DigiID</string>
     <string name="TouchSensor">Touch Sensor</string>
-    <string name="AuthRequired">Authentication required</string>
-    <string name="FingerprintSuccess">Fingerprint recognized</string>
-    <string name="FingerprintFailed">Fingerprint not recognized. Please try again.</string>
+    <string name="BiometricAuthRequest">Biometric Auth Request</string>
+    <string name="BiometricAuthFailure">Please try again</string>
+    <string name="BiometricAuthSuccessTransmitting">Auth success, transmitting…</string>
+
     <string name="Cancel">Cancel</string>
     <string name="ErrorSigning">Error signing transaction</string>
     <string name="Restore">Restore</string>
@@ -22,8 +23,8 @@
     <string name="DigiIDSuccess">DigiID Success</string>
     <string name="Transmitting">Transmitting</string>
     <string name="Exception">Exception</string>
-    <string name="RequireFingerprint">Require Fingerprint</string>
+    <string name="RequireBiometric">Require Biometric</string>
     <string name="SecurityRequirementTitle">Security Requirement</string>
-    <string name="SecurityRequirementMessage">On devices without a fingerprint sensor, it\'s mandatory for the phone to have a password set. Please set a password.</string>
+    <string name="SecurityRequirementMessage">On devices without biometric auth support, it\'s mandatory for the phone to have a password set. Please set a password.</string>
     <string name="Security">Security</string>
 </resources>

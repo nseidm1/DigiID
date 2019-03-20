@@ -10,8 +10,8 @@ android {
         applicationId "com.noahseidman.digiid"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.0.0.0.4"
+        versionCode 6
+        versionName "1.0.0.0.5"
         testInstrumentationRunner = 'android.support.test.runner.AndroidJUnitRunner'
     }
     dataBinding {
@@ -104,4 +104,5 @@ dependencies {
     implementation 'com.airbnb.android:lottie:2.5.4'
     implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
+    implementation 'androidx.biometric:biometric:1.0.0-alpha03'
 }

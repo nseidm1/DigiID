@@ -14,15 +14,15 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricPrompt;
 import com.crashlytics.android.Crashlytics;
 import com.jniwrappers.BRBIP32Sequence;
-import com.noahseidman.digiid.FragmentFingerprint;
 import com.noahseidman.digiid.FragmentSignal;
 import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
-import com.noahseidman.digiid.listeners.BRAuthCompletionCallback;
 import com.noahseidman.digiid.models.KeyModel;
 import com.noahseidman.digiid.models.MainActivityDataModel;
 import okhttp3.Request;
@@ -57,10 +57,10 @@ public class DigiID {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public static void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, MainActivityDataModel keyData) {
+    public static void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, @NonNull MainActivityDataModel keyData) {
         Uri bitUri = Uri.parse(bitID);
         String scheme = "https://";
-        if (!FingerprintUiHelper.fingerprintAvailable(context)) {
+        if (!BiometricHelper.biometricAvailable(context)) {
             KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
             if (keyguardManager.isKeyguardSecure()) {
                 byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
@@ -77,9 +77,35 @@ public class DigiID {
                 });
                 builder.show();
             }
-        } else if (FingerprintUiHelper.isFingerprintEnabled(context)) {
-            BRAuthCompletionCallback.AuthType type = new BRAuthCompletionCallback.AuthType(bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath());
-            FragmentFingerprint.show(context, null, null, type);
+        } else if (BiometricHelper.isBiometricEnabled(context)) {
+            BiometricPrompt prompt = new BiometricPrompt(context, Executors.newSingleThreadExecutor(), new BiometricPrompt.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthFailure, Toast.LENGTH_SHORT).show());
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
+                        byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
+                        DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+                    });
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthFailure, Toast.LENGTH_SHORT).show());
+                }
+            });
+            BiometricPrompt.PromptInfo.Builder builder = new BiometricPrompt.PromptInfo.Builder();
+            builder.setDescription(scheme + bitUri.getHost());
+            builder.setTitle(context.getString(R.string.BiometricAuthRequest));
+            builder.setNegativeButtonText(context.getString(android.R.string.cancel));
+            prompt.authenticate(builder.build());
         } else {
             byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
             DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
