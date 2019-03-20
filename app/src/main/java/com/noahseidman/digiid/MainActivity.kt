@@ -16,7 +16,6 @@ import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
-import com.noahseidman.digiid.listeners.BRAuthCompletionCallback
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.models.MainActivityDataModel
 import com.noahseidman.digiid.utils.*
@@ -39,14 +38,6 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     private var pendingNfcIntent: PendingIntent? = null
     external fun encodeSeed(seed: ByteArray, wordList: Array<String>): ByteArray
     external fun getSeedFromPhrase(phrase: ByteArray): ByteArray
-
-    override fun onComplete(authType: BRAuthCompletionCallback.AuthType) {
-        val seed = getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.seed.toByteArray(Charsets.UTF_8)))
-        DigiID.digiIDSignAndRespond(this, authType.bitId, authType.deepLink, authType.callbackUrl, seed)
-    }
-
-    override fun onCancel(type: BRAuthCompletionCallback.AuthType) {
-    }
 
     override fun onFingerprintClick() {
         handler.postDelayed({

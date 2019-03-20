@@ -10,19 +10,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentManager
 import com.google.zxing.client.android.CaptureActivity
 import com.noahseidman.digiid.databinding.ActivityMainBinding
-import com.noahseidman.digiid.listeners.BRAuthCompletionCallback
 import com.noahseidman.digiid.listeners.MainActivityCallback
 import com.noahseidman.digiid.listeners.OnBackPressListener
 import com.noahseidman.digiid.utils.QRUtils
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
-abstract class BaseActivity : AppCompatActivity(), MainActivityCallback,
-        BRAuthCompletionCallback, FragmentManager.OnBackStackChangedListener {
+abstract class BaseActivity : AppCompatActivity(), MainActivityCallback, FragmentManager.OnBackStackChangedListener {
 
     val handler: Handler = Handler(Looper.getMainLooper())
-    val persister: ExecutorService = Executors.newSingleThreadExecutor()
     private val backClickListeners = CopyOnWriteArrayList<OnBackPressListener>()
 
     companion object {

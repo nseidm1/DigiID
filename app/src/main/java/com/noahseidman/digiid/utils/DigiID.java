@@ -64,7 +64,7 @@ public class DigiID {
             KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
             if (keyguardManager.isKeyguardSecure()) {
                 byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
-                DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+                digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(R.string.SecurityRequirementTitle);
@@ -91,7 +91,7 @@ public class DigiID {
                     new Handler(Looper.getMainLooper()).post(() -> {
                         Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
                         byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
-                        DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+                        digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
                     });
                 }
 
@@ -108,11 +108,11 @@ public class DigiID {
             prompt.authenticate(builder.build());
         } else {
             byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
-            DigiID.digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
+            digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
         }
     }
 
-    public static void digiIDSignAndRespond(@NonNull final Activity app, @NonNull String bitID,
+    private static void digiIDSignAndRespond(@NonNull final Activity app, @NonNull String bitID,
                                             boolean isDeepLink, String callbackUrl, byte[] seed) {
         Handler handler = new Handler(Looper.getMainLooper());
         try {
