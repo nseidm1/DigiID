@@ -107,6 +107,7 @@ public class DigiID {
             builder.setNegativeButtonText(context.getString(android.R.string.cancel));
             prompt.authenticate(builder.build());
         } else {
+            Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
             byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
             digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
         }

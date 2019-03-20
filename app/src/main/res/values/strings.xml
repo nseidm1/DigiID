@@ -21,7 +21,7 @@
     <string name="Google">Google</string>
     <string name="NothingToRestore">Nothing to restore, please backup first</string>
     <string name="DigiIDSuccess">DigiID Success</string>
-    <string name="Transmitting">Transmitting</string>
+    <string name="Transmitting">Transmission Complete</string>
     <string name="Exception">Exception</string>
     <string name="RequireBiometric">Require Biometric</string>
     <string name="SecurityRequirementTitle">Security Requirement</string>
