@@ -50,11 +50,4 @@ public class BiometricHelper extends FingerprintManager.AuthenticationCallback {
         editor.putBoolean("fingerprint", enable);
         editor.apply();
     }
-
-    public interface Callback {
-
-        void onAuthenticated();
-
-        void onError();
-    }
 }
