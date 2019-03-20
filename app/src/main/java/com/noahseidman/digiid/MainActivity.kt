@@ -105,9 +105,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
         processNFC(intent)
         processDeepLink(intent)
-        fingerprint_switch.isEnabled = BiometricHelper.biometricAvailable(this)
-        fingerprint_switch.isChecked = fingerprint_switch.isEnabled && BiometricHelper.isBiometricEnabled(this)
-        fingerprint_switch.setOnCheckedChangeListener(this)
+        biometric_switch.isEnabled = BiometricHelper.biometricAvailable(this)
+        biometric_switch.isChecked = biometric_switch.isEnabled && BiometricHelper.isBiometricEnabled(this)
+        biometric_switch.setOnCheckedChangeListener(this)
         intent = Intent()
     }
 
