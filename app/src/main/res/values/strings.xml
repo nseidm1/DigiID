@@ -27,4 +27,5 @@
     <string name="SecurityRequirementTitle">Security Requirement</string>
     <string name="SecurityRequirementMessage">On devices without biometric auth support, it\'s mandatory for the phone to have a password set. Please set a password.</string>
     <string name="Security">Security</string>
+    <string name="DecryptionKeyUnavailable">Android decryption key unavailable, please contact developer for technical support</string>
 </resources>

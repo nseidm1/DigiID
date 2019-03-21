@@ -9,17 +9,21 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
-import android.util.Log
 import android.widget.CompoundButton
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
+import com.noahseidman.digiid.listeners.DataLoadListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.models.MainActivityDataModel
-import com.noahseidman.digiid.utils.*
+import com.noahseidman.digiid.utils.BiometricHelper
+import com.noahseidman.digiid.utils.DigiID
+import com.noahseidman.digiid.utils.FireBaseUtils
+import com.noahseidman.digiid.utils.QRUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.util.*
@@ -84,7 +88,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getData()
+        getData(null)
         supportFragmentManager.addOnBackStackChangedListener(this)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         nfcAdapter?.let {
@@ -113,13 +117,15 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent?.let {
-            processDeepLink(it.data?.toString())
-            processNFC(it)
-            handler.post {
-                setIntent(null)
+        getData(DataLoadListener {
+            intent?.let {
+                processDeepLink(it.data?.toString())
+                processNFC(it)
+                handler.post {
+                    setIntent(null)
+                }
             }
-        }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -136,17 +142,22 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                         }, 500)
                     }
                     QRUtils.SCANNER_RESTORE -> {
-                        val keyData: String? = intent?.getStringExtra("SCAN_RESULT")
-                        keyData?.let {
+                        val scanResult: String? = intent?.getStringExtra("SCAN_RESULT")
+                        scanResult?.let {
                             this.keyData.restore(this, it, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
-                                    if (seed.isNullOrEmpty()) {
-                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
-                                    } else {
-                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                    seed?.let {
+                                        restoreSuccessToast()
+                                    } ?: run {
+                                        restoreFailedToast()
                                     }
                                 }
+                                override fun onFailure() {
+                                    restoreFailedToast()
+                                }
                             })
+                        } ?: run {
+                            restoreFailedToast()
                         }
                     }
                     SELECT_IMAGE_RESTORE -> {
@@ -170,11 +181,14 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
                             this.keyData.restore(this, result.text, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
-                                    if (seed.isNullOrEmpty()) {
-                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
-                                    } else {
-                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                    seed?.let {
+                                        restoreSuccessToast()
+                                    } ?: run {
+                                        restoreFailedToast()
                                     }
+                                }
+                                override fun onFailure() {
+                                    restoreFailedToast()
                                 }
                             })
                         }
@@ -182,19 +196,26 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                     FIREBASE_RESTORE -> {
                         FireBaseUtils.restore(this, object : RestoreListener {
                             override fun onComplete(seed: String?) {
-                                if (seed == null) {
-                                    NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.NothingToRestore), "", R.raw.error_check) {}
-                                } else {
-                                    keyData.restore(this@MainActivity, seed, object : RestoreListener {
+                                seed?.let {
+                                    keyData.restore(this@MainActivity, it, object : RestoreListener {
                                         override fun onComplete(seed: String?) {
-                                            if (seed.isNullOrEmpty()) {
-                                                NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
-                                            } else {
-                                                NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                            seed?.let {
+                                                restoreSuccessToast()
+                                            } ?: run {
+                                                restoreFailedToast()
                                             }
                                         }
+                                        override fun onFailure() {
+                                            restoreFailedToast()
+                                        }
                                     })
+                                } ?: run {
+                                    NotificationFragment.show(this@MainActivity, getString(R.string.NothingToRestore), "", R.raw.error_check) {}
                                 }
+                            }
+                            override fun onFailure() {
+
+                                restoreFailedToast()
                             }
                         })
                     }
@@ -228,15 +249,22 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    fun getData() {
+    fun getData(dataLoadListener: DataLoadListener?) {
         keyData.populate(this, object : RestoreListener {
             override fun onComplete(seed: String?) {
-                if (keyData.seed.isEmpty()) {
-                    keyData = MainActivityDataModel(SeedUtil.generateRandomSeed(this@MainActivity))
-                    keyData.save(this@MainActivity)
-                }
-                Log.d("SeedWatch", keyData.seed)
+                dataLoadListener?.onDataLoaded()
+            }
+            override fun onFailure() {
+               handler.post { Toast.makeText(this@MainActivity, R.string.DecryptionKeyUnavailable, Toast.LENGTH_SHORT).show() }
             }
         })
+    }
+
+    fun restoreSuccessToast() {
+        NotificationFragment.show(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+    }
+
+    fun restoreFailedToast() {
+        NotificationFragment.show(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
     }
 }

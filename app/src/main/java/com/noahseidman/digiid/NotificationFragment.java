@@ -27,9 +27,9 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
     private SignalCompleteCallback completion;
     private FragmentNotificationBinding binding;
 
-    public static void showBreadSignal(AppCompatActivity activity, String title,
-                                       String iconDescription,
-                                       int drawableId, SignalCompleteCallback completion) {
+    public static void show(AppCompatActivity activity, String title,
+                            String iconDescription,
+                            int drawableId, SignalCompleteCallback completion) {
         NotificationFragment fragmentSignal = new NotificationFragment();
         Bundle bundle = new Bundle();
         bundle.putString(NotificationFragment.TITLE, title);
@@ -41,6 +41,7 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
         transaction.setCustomAnimations(R.animator.from_bottom, R.animator.to_bottom,
                 R.animator.from_bottom, R.animator.to_bottom);
         transaction.add(android.R.id.content, fragmentSignal, NotificationFragment.class.getName());
+        transaction.addToBackStack(NotificationFragment.class.getName());
         transaction.commitAllowingStateLoss();
     }
 

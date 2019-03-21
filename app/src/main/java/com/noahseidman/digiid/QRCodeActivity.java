@@ -19,6 +19,7 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.noahseidman.digiid.databinding.ActivityQrCodeBinding;
 import com.noahseidman.digiid.listeners.ActivityQRCodeCallback;
+import com.noahseidman.digiid.listeners.SaveListener;
 import com.noahseidman.digiid.listeners.SignalCompleteCallback;
 import com.noahseidman.digiid.utils.AnimatorHelper;
 import com.noahseidman.digiid.utils.FireBaseUtils;
@@ -82,7 +83,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                     .insertImage(getContentResolver(),
                             QRUtils.getQRImage(QRCodeActivity.this, phrase),
                             "DigiID", "DigiID Backup");
-            NotificationFragment.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
+            NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
                 @Override
                 public void onComplete() {
 
@@ -113,7 +114,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                                 QRUtils.getQRImage(QRCodeActivity.this,
                                         getIntent().getStringExtra(SEED_PHRASE)),
                                 "DigiID", "DigiID Backup");
-                        NotificationFragment.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
+                        NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
                             @Override
                             public void onComplete() {
 
@@ -144,7 +145,17 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
         super.onActivityResult(requestCode, resultCode, d);
         if (requestCode == FIREBASE_CODE) {
             if (resultCode == RESULT_OK) {
-                FireBaseUtils.Companion.save(getIntent().getStringExtra(SEED_PHRASE), this);
+                FireBaseUtils.Companion.save(getIntent().getStringExtra(SEED_PHRASE), this, new SaveListener() {
+                    @Override
+                    public void onComplete() {
+                        NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToDrive), "", R.raw.success_check, null);
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        NotificationFragment.show(QRCodeActivity.this, getString(R.string.BackupFailed), "", R.raw.error_check, null);
+                    }
+                });
             }else {
                 Crashlytics.log("Firebase Auth Failed");
             }

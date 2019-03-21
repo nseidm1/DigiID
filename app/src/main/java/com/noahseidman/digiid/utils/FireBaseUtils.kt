@@ -8,10 +8,9 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.noahseidman.digiid.NotificationFragment
-import com.noahseidman.digiid.R
 import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
 import com.noahseidman.digiid.listeners.RestoreListener
+import com.noahseidman.digiid.listeners.SaveListener
 import java.io.IOException
 import java.nio.charset.Charset
 import java.security.MessageDigest
@@ -25,26 +24,31 @@ class FireBaseUtils {
         private val persister = Executors.newSingleThreadExecutor()
         var advertisingId: String? = null
 
-        fun save(seed: String, context: AppCompatActivity) {
+        fun save(seed: String, context: AppCompatActivity, saveListener: SaveListener) {
             updateAdId(context, object: OnAdIdUpdateListener {
                 override fun onComplete() {
-                    val ref = FirebaseFirestore.getInstance().collection("data").
-                        document(String(MessageDigest.getInstance("SHA-256").digest(advertisingId!!.toByteArray(Charset.defaultCharset()))))
-                    ref.get().addOnSuccessListener { documentSnapshot ->
-                        if (documentSnapshot.exists()) {
-                            val data = HashMap<String, Any>()
-                            data["seed"] = seed
-                            ref.update(data)
-                            NotificationFragment.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
-                        } else {
-                            val data = HashMap<String, Any>()
-                            data["seed"] = seed
-                            ref.set(data)
-                            NotificationFragment.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
+                    advertisingId?.let {
+                        val ref = FirebaseFirestore.getInstance().collection("data").
+                            document(String(MessageDigest.getInstance("SHA-256").digest(it.toByteArray(Charset.defaultCharset()))))
+                        ref.get().addOnSuccessListener { documentSnapshot ->
+                            if (documentSnapshot.exists()) {
+                                val data = HashMap<String, Any>()
+                                data["seed"] = seed
+                                ref.update(data)
+                                saveListener.onComplete()
+                            } else {
+                                val data = HashMap<String, Any>()
+                                data["seed"] = seed
+                                ref.set(data)
+                                saveListener.onComplete()
+                            }
+                        }.addOnFailureListener {
+                            saveListener.onFailure()
                         }
-                    }.addOnFailureListener {
-                        NotificationFragment.showBreadSignal(context, context.getString(R.string.BackupFailed), "", R.raw.error_check) { }
                     }
+                }
+                override fun onFailure() {
+                    saveListener.onFailure()
                 }
             })
         }
@@ -52,39 +56,45 @@ class FireBaseUtils {
         fun restore(context: Context, restoreListener: RestoreListener) {
             updateAdId(context, object: OnAdIdUpdateListener {
                 override fun onComplete() {
-                    val ref = FirebaseFirestore.getInstance().collection("data").
-                        document(String(MessageDigest.getInstance("SHA-256").digest(advertisingId!!.toByteArray(Charset.defaultCharset()))))
-                    ref.get().addOnSuccessListener { documentSnapshot ->
-                        if (documentSnapshot.exists()) {
-                            val seed: String = documentSnapshot.getString("seed")!!
-                            restoreListener.onComplete(seed)
-                        } else {
+                    advertisingId?.let {
+                        val ref = FirebaseFirestore.getInstance().collection("data").
+                            document(String(MessageDigest.getInstance("SHA-256").digest(it.toByteArray(Charset.defaultCharset()))))
+                        ref.get().addOnSuccessListener { documentSnapshot ->
+                            if (documentSnapshot.exists()) {
+                                val seed: String = documentSnapshot.getString("seed")!!
+                                restoreListener.onComplete(seed)
+                            } else {
+                                restoreListener.onComplete(null)
+                            }
+                        }.addOnFailureListener {
                             restoreListener.onComplete(null)
                         }
                     }
+                }
+                override fun onFailure() {
+                    restoreListener.onFailure()
                 }
             })
         }
 
         fun updateAdId(context: Context, onCompleteListener: OnAdIdUpdateListener) {
-            if (advertisingId.isNullOrEmpty()) {
+            advertisingId?.let {
+                onCompleteListener.onComplete()
+            } ?: run {
                 persister.execute {
                     try {
                         val info = AdvertisingIdClient.getAdvertisingIdInfo(context)
                         advertisingId = info.id
+                        handler.post { onCompleteListener.onComplete() }
                     } catch (e: IOException) {
-                        e.printStackTrace()
+                        handler.post { onCompleteListener.onFailure() }
                     } catch (e: GooglePlayServicesNotAvailableException) {
-                        e.printStackTrace()
+                        handler.post { onCompleteListener.onFailure() }
                     } catch (e: GooglePlayServicesRepairableException) {
-                        e.printStackTrace()
+                        handler.post { onCompleteListener.onFailure() }
                     }
-                    handler.post {
-                        onCompleteListener.onComplete()
-                    }
-                }
-            } else {
-                onCompleteListener.onComplete()
+               }
+
             }
         }
      }

@@ -107,7 +107,7 @@ public class DigiID {
             builder.setNegativeButtonText(context.getString(android.R.string.cancel));
             prompt.authenticate(builder.build());
         } else {
-            Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show());
             byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
             digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
         }
@@ -142,7 +142,7 @@ public class DigiID {
                         "Response: " + res.code() + ", Message: " + res.message());
                 if (res.code() == 200) {
                     handler.post(
-                            () -> NotificationFragment.showBreadSignal((AppCompatActivity) app, app.getString(R.string.DigiIDSuccess),
+                            () -> NotificationFragment.show((AppCompatActivity) app, app.getString(R.string.DigiIDSuccess),
                             app.getString(R.string.Transmitting), R.raw.success_check, () -> {
                                         if (isDeepLink) {
                                             app.finishAffinity();
@@ -151,7 +151,7 @@ public class DigiID {
                 } else {
                     Crashlytics.getInstance().core.log("Server Response: " + res.code());
                     handler.post(
-                            () -> NotificationFragment.showBreadSignal((AppCompatActivity) app,  Integer.toString(res.code()),
+                            () -> NotificationFragment.show((AppCompatActivity) app,  Integer.toString(res.code()),
                                     app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
                                         if (isDeepLink) {
                                             app.finishAffinity();
@@ -163,7 +163,7 @@ public class DigiID {
             Crashlytics.getInstance().core.logException(e);
             e.printStackTrace();
             handler.post(
-                    () -> NotificationFragment.showBreadSignal((AppCompatActivity) app, app.getString(R.string.Exception),
+                    () -> NotificationFragment.show((AppCompatActivity) app, app.getString(R.string.Exception),
                             app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
                                 if (isDeepLink) {
                                     app.finishAffinity();
