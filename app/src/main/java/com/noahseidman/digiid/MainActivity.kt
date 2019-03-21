@@ -11,6 +11,7 @@ import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.util.Log
 import android.widget.CompoundButton
+import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
@@ -94,12 +95,10 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 0
             )
         }
-        processNFC(intent)
-        processDeepLink(intent)
+        onNewIntent(intent)
         biometric_switch.isEnabled = BiometricHelper.biometricAvailable(this)
         biometric_switch.isChecked = biometric_switch.isEnabled && BiometricHelper.isBiometricEnabled(this)
         biometric_switch.setOnCheckedChangeListener(this)
-        intent = Intent()
     }
 
     override fun onResume() {
@@ -114,9 +113,13 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        processDeepLink(intent)
-        processNFC(intent)
-        this.intent = Intent()
+        intent?.let {
+            processDeepLink(it.data?.toString())
+            processNFC(it)
+            handler.post {
+                setIntent(null)
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -200,16 +203,16 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    private fun processDeepLink(@Nullable intent: Intent?) {
-        intent?.data?.let {
-            if (DigiID.isBitId(it.toString())) {
-                DigiID.digiIDAuthPrompt(this, it.toString(), true, keyData)
+    private fun processDeepLink(@Nullable uriString: String?) {
+        uriString?.let {
+            if (DigiID.isBitId(uriString)) {
+                DigiID.digiIDAuthPrompt(this, it, true, keyData)
             }
         }
     }
 
-    private fun processNFC(@Nullable intent: Intent?) {
-        val tag = intent?.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+    private fun processNFC(@NonNull intent: Intent) {
+        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
         val ndef = Ndef.get(tag) ?: return
         val ndefMessage = ndef.cachedNdefMessage ?: return
         val records = ndefMessage.records ?: return
