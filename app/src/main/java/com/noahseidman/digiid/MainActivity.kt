@@ -268,7 +268,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 try {
                     val record = String(ndefRecord.payload)
                     if (record.contains("digiid")) {
-                        DigiID.digiIDAuthPrompt(this, record, false, keyData)
+                        DigiID.digiIDAuthPrompt(this, record.substring(record.indexOf("digiid")), false, keyData)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
