@@ -18,34 +18,8 @@ import com.noahseidman.digiid.models.FragmentSignalViewModel;
 import com.noahseidman.digiid.utils.AnimatorHelper;
 import org.jetbrains.annotations.NotNull;
 
-
-/**
- * BreadWallet
- * <p>
- * Created by Mihail Gutan <mihail@breadwallet.com> on 6/29/15.
- * Copyright (c) 2016 breadwallet LLC
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-public class FragmentSignal extends Fragment implements OnBackPressListener {
-    private static final String TAG = FragmentSignal.class.getName();
+public class NotificationFragment extends Fragment implements OnBackPressListener {
+    private static final String TAG = NotificationFragment.class.getName();
 
     private static final String TITLE = "title";
     private static final String ICON_DESCRIPTION = "iconDescription";
@@ -56,18 +30,17 @@ public class FragmentSignal extends Fragment implements OnBackPressListener {
     public static void showBreadSignal(AppCompatActivity activity, String title,
                                        String iconDescription,
                                        int drawableId, SignalCompleteCallback completion) {
-        FragmentSignal fragmentSignal = new FragmentSignal();
+        NotificationFragment fragmentSignal = new NotificationFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(FragmentSignal.TITLE, title);
-        bundle.putString(FragmentSignal.ICON_DESCRIPTION, iconDescription);
+        bundle.putString(NotificationFragment.TITLE, title);
+        bundle.putString(NotificationFragment.ICON_DESCRIPTION, iconDescription);
         fragmentSignal.setCompletion(completion);
-        bundle.putInt(FragmentSignal.RES_ID, drawableId);
+        bundle.putInt(NotificationFragment.RES_ID, drawableId);
         fragmentSignal.setArguments(bundle);
         FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.from_bottom, R.animator.to_bottom,
                 R.animator.from_bottom, R.animator.to_bottom);
-        transaction.add(android.R.id.content, fragmentSignal, FragmentSignal.class.getName());
-        transaction.addToBackStack(FragmentSignal.class.getName());
+        transaction.add(android.R.id.content, fragmentSignal, NotificationFragment.class.getName());
         transaction.commitAllowingStateLoss();
     }
 

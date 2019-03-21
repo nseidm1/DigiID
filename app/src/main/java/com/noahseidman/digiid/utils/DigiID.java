@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 import com.crashlytics.android.Crashlytics;
 import com.jniwrappers.BRBIP32Sequence;
-import com.noahseidman.digiid.FragmentSignal;
+import com.noahseidman.digiid.NotificationFragment;
 import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.models.KeyModel;
@@ -142,7 +142,7 @@ public class DigiID {
                         "Response: " + res.code() + ", Message: " + res.message());
                 if (res.code() == 200) {
                     handler.post(
-                            () -> FragmentSignal.showBreadSignal((AppCompatActivity) app, app.getString(R.string.DigiIDSuccess),
+                            () -> NotificationFragment.showBreadSignal((AppCompatActivity) app, app.getString(R.string.DigiIDSuccess),
                             app.getString(R.string.Transmitting), R.raw.success_check, () -> {
                                         if (isDeepLink) {
                                             app.finishAffinity();
@@ -151,7 +151,7 @@ public class DigiID {
                 } else {
                     Crashlytics.getInstance().core.log("Server Response: " + res.code());
                     handler.post(
-                            () -> FragmentSignal.showBreadSignal((AppCompatActivity) app,  Integer.toString(res.code()),
+                            () -> NotificationFragment.showBreadSignal((AppCompatActivity) app,  Integer.toString(res.code()),
                                     app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
                                         if (isDeepLink) {
                                             app.finishAffinity();
@@ -163,7 +163,7 @@ public class DigiID {
             Crashlytics.getInstance().core.logException(e);
             e.printStackTrace();
             handler.post(
-                    () -> FragmentSignal.showBreadSignal((AppCompatActivity) app, app.getString(R.string.Exception),
+                    () -> NotificationFragment.showBreadSignal((AppCompatActivity) app, app.getString(R.string.Exception),
                             app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
                                 if (isDeepLink) {
                                     app.finishAffinity();

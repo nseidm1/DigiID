@@ -141,9 +141,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             this.keyData.restore(this, it, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
                                     if (seed.isNullOrEmpty()) {
-                                        FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
+                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
                                     } else {
-                                        FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
                                     }
                                 }
                             })
@@ -171,9 +171,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             this.keyData.restore(this, result.text, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
                                     if (seed.isNullOrEmpty()) {
-                                        FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
+                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
                                     } else {
-                                        FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                        NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
                                     }
                                 }
                             })
@@ -183,14 +183,14 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                         FireBaseUtils.restore(this, object : RestoreListener {
                             override fun onComplete(seed: String?) {
                                 if (seed == null) {
-                                    FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.NothingToRestore), "", R.raw.error_check) {}
+                                    NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.NothingToRestore), "", R.raw.error_check) {}
                                 } else {
                                     keyData.restore(this@MainActivity, seed, object : RestoreListener {
                                         override fun onComplete(seed: String?) {
                                             if (seed.isNullOrEmpty()) {
-                                                FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
+                                                NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
                                             } else {
-                                                FragmentSignal.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
+                                                NotificationFragment.showBreadSignal(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
                                             }
                                         }
                                     })

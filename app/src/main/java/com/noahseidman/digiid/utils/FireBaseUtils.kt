@@ -8,7 +8,7 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.noahseidman.digiid.FragmentSignal
+import com.noahseidman.digiid.NotificationFragment
 import com.noahseidman.digiid.R
 import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
 import com.noahseidman.digiid.listeners.RestoreListener
@@ -35,15 +35,15 @@ class FireBaseUtils {
                             val data = HashMap<String, Any>()
                             data["seed"] = seed
                             ref.update(data)
-                            FragmentSignal.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
+                            NotificationFragment.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
                         } else {
                             val data = HashMap<String, Any>()
                             data["seed"] = seed
                             ref.set(data)
-                            FragmentSignal.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
+                            NotificationFragment.showBreadSignal(context, context.getString(R.string.SavedToDrive), "", R.raw.success_check) { }
                         }
                     }.addOnFailureListener {
-                        FragmentSignal.showBreadSignal(context, context.getString(R.string.BackupFailed), "", R.raw.error_check) { }
+                        NotificationFragment.showBreadSignal(context, context.getString(R.string.BackupFailed), "", R.raw.error_check) { }
                     }
                 }
             })

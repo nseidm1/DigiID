@@ -82,7 +82,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                     .insertImage(getContentResolver(),
                             QRUtils.getQRImage(QRCodeActivity.this, phrase),
                             "DigiID", "DigiID Backup");
-            FragmentSignal.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
+            NotificationFragment.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
                 @Override
                 public void onComplete() {
 
@@ -113,7 +113,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                                 QRUtils.getQRImage(QRCodeActivity.this,
                                         getIntent().getStringExtra(SEED_PHRASE)),
                                 "DigiID", "DigiID Backup");
-                        FragmentSignal.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
+                        NotificationFragment.showBreadSignal(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
                             @Override
                             public void onComplete() {
 
