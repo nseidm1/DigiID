@@ -19,6 +19,7 @@
     <string name="Restored">Restored</string>
     <string name="RestoreFailed">Resore Failed</string>
     <string name="Google">Google</string>
+    <string name="ShowSeedPhrase">Show</string>
     <string name="NothingToRestore">Nothing to restore, please backup first</string>
     <string name="DigiIDSuccess">DigiID Success</string>
     <string name="Transmitting">Transmission Complete</string>
@@ -28,4 +29,8 @@
     <string name="SecurityRequirementMessage">On devices without biometric auth support, it\'s mandatory for the phone to have a password set. Please set a password.</string>
     <string name="Security">Security</string>
     <string name="IdentityUnavailable">DigiID identity unavailable, please contact technical support</string>
+    <string name="Copy">Copy</string>
+    <string name="CopiedToClipboard">Copied to Clipboard</string>
+    <string name="DigiIDSeedPhrase">DigiID Seed Phrase</string>
+    <string name="CopyFailed">Copy Failed</string>
 </resources>
