@@ -241,7 +241,6 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                                 }
                             }
                             override fun onFailure() {
-
                                 restoreFailedNotification()
                             }
                         })

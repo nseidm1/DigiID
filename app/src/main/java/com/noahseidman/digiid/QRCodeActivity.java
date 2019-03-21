@@ -20,7 +20,6 @@ import com.firebase.ui.auth.AuthUI;
 import com.noahseidman.digiid.databinding.ActivityQrCodeBinding;
 import com.noahseidman.digiid.listeners.ActivityQRCodeCallback;
 import com.noahseidman.digiid.listeners.SaveListener;
-import com.noahseidman.digiid.listeners.SignalCompleteCallback;
 import com.noahseidman.digiid.utils.AnimatorHelper;
 import com.noahseidman.digiid.utils.FireBaseUtils;
 import com.noahseidman.digiid.utils.QRUtils;
@@ -83,12 +82,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                     .insertImage(getContentResolver(),
                             QRUtils.getQRImage(QRCodeActivity.this, phrase),
                             "DigiID", "DigiID Backup");
-            NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
-                @Override
-                public void onComplete() {
-
-                }
-            });
+            NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, null);
         }
     }
 
@@ -104,22 +98,15 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                 case 0: {
                     if (ContextCompat
                             .checkSelfPermission(QRCodeActivity.this,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            != PackageManager.PERMISSION_GRANTED) {
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(QRCodeActivity.this,
                                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                 WRITE_STORAGE_PERMISSION);
                     } else {
                         MediaStore.Images.Media.insertImage(getContentResolver(),
-                                QRUtils.getQRImage(QRCodeActivity.this,
-                                        getIntent().getStringExtra(SEED_PHRASE)),
+                                QRUtils.getQRImage(QRCodeActivity.this, getIntent().getStringExtra(SEED_PHRASE)),
                                 "DigiID", "DigiID Backup");
-                        NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, new SignalCompleteCallback() {
-                            @Override
-                            public void onComplete() {
-
-                            }
-                        });
+                        NotificationFragment.show(QRCodeActivity.this, getString(R.string.SavedToPictures), "", R.raw.success_check, null);
                     }
                     break;
                 }
@@ -133,8 +120,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                 }
             }
         });
-        builder.setCancelable(true).setNegativeButton(R.string.button_cancel, (dialog, id) -> {
-        });
+        builder.setCancelable(true).setNegativeButton(R.string.button_cancel, (dialog, id) -> {});
         AlertDialog alert = builder.create();
         alert.show();
         return true;
@@ -158,6 +144,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                 });
             }else {
                 Crashlytics.log("Firebase Auth Failed");
+                NotificationFragment.show(QRCodeActivity.this, getString(R.string.BackupFailed), "", R.raw.error_check, null);
             }
         }
     }
