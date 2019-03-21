@@ -174,17 +174,17 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             this.keyData.restore(this, it, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
                                     seed?.let {
-                                        restoreSuccessToast()
+                                        restoreSuccessNotification()
                                     } ?: run {
-                                        restoreFailedToast()
+                                        restoreFailedNotification()
                                     }
                                 }
                                 override fun onFailure() {
-                                    restoreFailedToast()
+                                    restoreFailedNotification()
                                 }
                             })
                         } ?: run {
-                            restoreFailedToast()
+                            restoreFailedNotification()
                         }
                     }
                     SELECT_IMAGE_RESTORE -> {
@@ -209,13 +209,13 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             this.keyData.restore(this, result.text, object : RestoreListener {
                                 override fun onComplete(seed: String?) {
                                     seed?.let {
-                                        restoreSuccessToast()
+                                        restoreSuccessNotification()
                                     } ?: run {
-                                        restoreFailedToast()
+                                        restoreFailedNotification()
                                     }
                                 }
                                 override fun onFailure() {
-                                    restoreFailedToast()
+                                    restoreFailedNotification()
                                 }
                             })
                         }
@@ -227,13 +227,13 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                                     keyData.restore(this@MainActivity, it, object : RestoreListener {
                                         override fun onComplete(seed: String?) {
                                             seed?.let {
-                                                restoreSuccessToast()
+                                                restoreSuccessNotification()
                                             } ?: run {
-                                                restoreFailedToast()
+                                                restoreFailedNotification()
                                             }
                                         }
                                         override fun onFailure() {
-                                            restoreFailedToast()
+                                            restoreFailedNotification()
                                         }
                                     })
                                 } ?: run {
@@ -242,7 +242,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             }
                             override fun onFailure() {
 
-                                restoreFailedToast()
+                                restoreFailedNotification()
                             }
                         })
                     }
@@ -317,11 +317,11 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    fun restoreSuccessToast() {
+    fun restoreSuccessNotification() {
         NotificationFragment.show(this@MainActivity, getString(R.string.Restored), "", R.raw.success_check) {}
     }
 
-    fun restoreFailedToast() {
+    fun restoreFailedNotification() {
         NotificationFragment.show(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
     }
 }
