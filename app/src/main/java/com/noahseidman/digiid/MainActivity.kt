@@ -144,9 +144,6 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         intent?.let {
-            if (it.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 1) {
-                return
-            }
             getData(DataLoadListener {
                 processDeepLink(it.data?.toString())
                 processNFC(it.getParcelableExtra(NfcAdapter.EXTRA_TAG))
