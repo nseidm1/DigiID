@@ -35,7 +35,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
     private static final String SEED_PHRASE = "QRCodeActivity:SeedPhrase";
     private ActivityQrCodeBinding binding;
     private String phrase;
-    private final ActivityQRCodeCallback callback = () -> onBackPressed();
+    private final ActivityQRCodeCallback callback = this::onBackPressed;
 
     public static void show(AppCompatActivity activity, String seedPhrase) {
         Intent intent = new Intent(activity, QRCodeActivity.class);
@@ -69,7 +69,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
     @Override
     public void onBackPressed() {
         ObjectAnimator colorFade =
-                AnimatorHelper.animateBackgroundDim(binding.background, true, () -> finish());
+                AnimatorHelper.animateBackgroundDim(binding.background, true, this::finish);
         colorFade.setDuration(500);
         colorFade.start();
     }

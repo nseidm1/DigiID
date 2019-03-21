@@ -61,8 +61,7 @@ class FireBaseUtils {
                             document(String(MessageDigest.getInstance("SHA-256").digest(it.toByteArray(Charset.defaultCharset()))))
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
-                                val seed: String = documentSnapshot.getString("seed")!!
-                                restoreListener.onComplete(seed)
+                                restoreListener.onComplete(documentSnapshot.getString("seed"))
                             } else {
                                 restoreListener.onComplete(null)
                             }
@@ -92,9 +91,10 @@ class FireBaseUtils {
                         handler.post { onCompleteListener.onFailure() }
                     } catch (e: GooglePlayServicesRepairableException) {
                         handler.post { onCompleteListener.onFailure() }
+                    } catch( e: Exception) {
+                        handler.post { onCompleteListener.onFailure() }
                     }
                }
-
             }
         }
      }

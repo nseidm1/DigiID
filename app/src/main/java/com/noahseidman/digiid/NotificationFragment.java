@@ -87,9 +87,7 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
             } catch (Exception ignored) {
 
             }
-            new Handler().postDelayed(() -> {
-                fadeOutRemove();
-            }, 300);
+            new Handler().postDelayed(this::fadeOutRemove, 300);
         }, 2000);
     }
 

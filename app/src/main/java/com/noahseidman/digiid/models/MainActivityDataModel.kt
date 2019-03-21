@@ -42,7 +42,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
 
     fun getStoredSeed(context: Context): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        return prefs.getString("seed", "")
+        return prefs.getString("seed", "")!!
     }
 
     fun restore(context: Context, seed: String, restoreListener: RestoreListener) {
@@ -78,24 +78,28 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val eCryptSymmetric = ECSymmetric()
                 FireBaseUtils.advertisingId?.let {
-                    eCryptSymmetric.decrypt(prefs.getString("seed", ""), it, object : ECResultListener {
-                        override fun onProgress(i: Int, l: Long, l1: Long) {}
-                        override fun <T> onSuccess(result: T) {
-                            seed = result as String
-                            restoreListener.onComplete(seed)
-                        }
-                        override fun onFailure(s: String, e: Exception) {
-                            seed = SeedUtil.generateRandomSeed(context)
-                            save(context, object : SaveListener {
-                                override fun onComplete() {
-                                    restoreListener.onComplete(seed)
-                                }
-                                override fun onFailure() {
-                                    restoreListener.onFailure()
-                                }
-                            })
-                        }
-                    })
+                    if (seed.isEmpty()) {
+                        eCryptSymmetric.decrypt(prefs.getString("seed", ""), it, object : ECResultListener {
+                            override fun onProgress(i: Int, l: Long, l1: Long) {}
+                            override fun <T> onSuccess(result: T) {
+                                seed = result as String
+                                restoreListener.onComplete(seed)
+                            }
+                            override fun onFailure(s: String, e: Exception) {
+                                seed = SeedUtil.generateRandomSeed(context)
+                                save(context, object : SaveListener {
+                                    override fun onComplete() {
+                                        restoreListener.onComplete(seed)
+                                    }
+                                    override fun onFailure() {
+                                        restoreListener.onFailure()
+                                    }
+                                })
+                            }
+                        })
+                    } else {
+                        restoreListener.onComplete(seed)
+                    }
                 }
             }
             override fun onFailure() {

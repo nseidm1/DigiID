@@ -80,24 +80,19 @@ public class DigiID {
         } else if (BiometricHelper.isBiometricEnabled(context)) {
             BiometricPrompt prompt = new BiometricPrompt(context, Executors.newSingleThreadExecutor(), new BiometricPrompt.AuthenticationCallback() {
                 @Override
-                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                    super.onAuthenticationError(errorCode, errString);
-                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthFailure, Toast.LENGTH_SHORT).show());
-                }
-
-                @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-                    super.onAuthenticationSucceeded(result);
                     new Handler(Looper.getMainLooper()).post(() -> {
                         Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
                         byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
                         digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
                     });
                 }
-
                 @Override
                 public void onAuthenticationFailed() {
-                    super.onAuthenticationFailed();
+                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthFailure, Toast.LENGTH_SHORT).show());
+                }
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                     new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.BiometricAuthFailure, Toast.LENGTH_SHORT).show());
                 }
             });

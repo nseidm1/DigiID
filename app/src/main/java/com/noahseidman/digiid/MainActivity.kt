@@ -11,8 +11,8 @@ import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.widget.CompoundButton
 import android.widget.Toast
-import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+import androidx.biometric.BiometricPrompt
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
 import com.google.zxing.*
@@ -27,14 +27,10 @@ import com.noahseidman.digiid.utils.QRUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.util.*
-
+import java.util.concurrent.Executors
 
 
 class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
-
-    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        BiometricHelper.enableBiometric(this, isChecked)
-    }
 
     private val SELECT_IMAGE_RESTORE: Int = 4334
     private val FIREBASE_RESTORE = 32443
@@ -51,6 +47,23 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onRestoreClick() {
+        if (BiometricHelper.isBiometricEnabled(this)) {
+            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    handler.post { showRestoreDialog() }
+                }
+            })
+            val builder = BiometricPrompt.PromptInfo.Builder()
+            builder.setDescription(getString(R.string.PleaseProvideAuth))
+            builder.setTitle(getString(R.string.BiometricAuthRequest))
+            builder.setNegativeButtonText(getString(android.R.string.cancel))
+            prompt.authenticate(builder.build())
+        } else {
+            showRestoreDialog()
+        }
+    }
+
+    private fun showRestoreDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.Options)
         val items = arrayOfNulls<CharSequence>(3)
@@ -83,7 +96,20 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onBackupClick() {
-        QRCodeActivity.show(this, keyData.getStoredSeed(this))
+        if (BiometricHelper.isBiometricEnabled(this)) {
+            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    handler.post { QRCodeActivity.show(this@MainActivity, keyData.getStoredSeed(this@MainActivity)) }
+                }
+            })
+            val builder = BiometricPrompt.PromptInfo.Builder()
+            builder.setDescription(getString(R.string.PleaseProvideAuth))
+            builder.setTitle(getString(R.string.BiometricAuthRequest))
+            builder.setNegativeButtonText(getString(android.R.string.cancel))
+            prompt.authenticate(builder.build())
+        } else {
+            QRCodeActivity.show(this, keyData.getStoredSeed(this))
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,16 +147,12 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
             if (it.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 1) {
                 return
             }
-        }
-        getData(DataLoadListener {
-            intent?.let {
+            getData(DataLoadListener {
                 processDeepLink(it.data?.toString())
-                processNFC(it)
-                handler.post {
-                    setIntent(null)
-                }
-            }
-        })
+                processNFC(it.getParcelableExtra(NfcAdapter.EXTRA_TAG))
+                setIntent(null)
+            })
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -229,27 +251,28 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    private fun processDeepLink(@Nullable uriString: String?) {
+    private fun processDeepLink(@Nullable uriString : String?) {
         uriString?.let {
-            if (DigiID.isBitId(uriString)) {
+            if (DigiID.isBitId(it)) {
                 DigiID.digiIDAuthPrompt(this, it, true, keyData)
             }
         }
     }
 
-    private fun processNFC(@NonNull intent: Intent) {
-        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
-        val ndef = Ndef.get(tag) ?: return
-        val ndefMessage = ndef.cachedNdefMessage ?: return
-        val records = ndefMessage.records ?: return
-        for (ndefRecord in records) {
-            try {
-                val record = String(ndefRecord.payload)
-                if (record.contains("digiid")) {
-                    DigiID.digiIDAuthPrompt(this, record, false, keyData)
+    private fun processNFC(@Nullable tag: Tag?) {
+        tag?.let {
+            val ndef = Ndef.get(tag) ?: return
+            val ndefMessage = ndef.cachedNdefMessage ?: return
+            val records = ndefMessage.records ?: return
+            for (ndefRecord in records) {
+                try {
+                    val record = String(ndefRecord.payload)
+                    if (record.contains("digiid")) {
+                        DigiID.digiIDAuthPrompt(this, record, false, keyData)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
@@ -260,9 +283,38 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 dataLoadListener?.onDataLoaded()
             }
             override fun onFailure() {
-               handler.post { Toast.makeText(this@MainActivity, R.string.DecryptionKeyUnavailable, Toast.LENGTH_SHORT).show() }
+               handler.post { Toast.makeText(this@MainActivity, R.string.IdentityUnavailable, Toast.LENGTH_SHORT).show() }
             }
         })
+    }
+
+    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        if (!isChecked) {
+            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    handler.post { BiometricHelper.enableBiometric(this@MainActivity, false) }
+                }
+                override fun onAuthenticationFailed() {
+                    handler.post {
+                        BiometricHelper.enableBiometric(this@MainActivity, true)
+                        biometric_switch.isChecked = true
+                    }
+                }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    handler.post {
+                        BiometricHelper.enableBiometric(this@MainActivity, true)
+                        biometric_switch.isChecked = true
+                    }
+                }
+            })
+            val builder = BiometricPrompt.PromptInfo.Builder()
+            builder.setDescription(getString(R.string.PleaseProvideAuth))
+            builder.setTitle(getString(R.string.BiometricAuthRequest))
+            builder.setNegativeButtonText(getString(android.R.string.cancel))
+            prompt.authenticate(builder.build())
+        } else {
+            BiometricHelper.enableBiometric(this@MainActivity, isChecked)
+        }
     }
 
     fun restoreSuccessToast() {

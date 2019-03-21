@@ -41,7 +41,7 @@ public class BiometricHelper extends FingerprintManager.AuthenticationCallback {
 
     public static boolean isBiometricEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean("fingerprint", true);
+        return prefs.getBoolean("fingerprint", biometricAvailable(context));
     }
 
     public static void enableBiometric(Context context, boolean enable) {
