@@ -164,7 +164,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                         handler.postDelayed({
                             val result = intent?.getStringExtra("SCAN_RESULT")
                             result?.let {
-                                DigiID.digiIDAuthPrompt(this, result, false, keyData)
+                                DigiID.digiIDAuthPrompt(this, it, false, keyData)
                             }
                         }, 500)
                     }
