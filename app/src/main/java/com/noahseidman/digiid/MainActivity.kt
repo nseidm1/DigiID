@@ -32,9 +32,9 @@ import java.util.concurrent.Executors
 
 class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
-    private val SELECT_IMAGE_RESTORE: Int = 4334
+    private val SELECT_IMAGE_RESTORE = 4334
     private val FIREBASE_RESTORE = 32443
-    private var keyData: MainActivityDataModel = MainActivityDataModel()
+    private var keyData = MainActivityDataModel()
     private var nfcAdapter: NfcAdapter? = null
     private var pendingNfcIntent: PendingIntent? = null
     external fun encodeSeed(seed: ByteArray, wordList: Array<String>): ByteArray
