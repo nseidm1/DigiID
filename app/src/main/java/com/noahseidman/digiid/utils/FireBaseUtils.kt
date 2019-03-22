@@ -29,7 +29,8 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256").digest(it.toByteArray(Charset.defaultCharset()))))
+                            document(String(MessageDigest.getInstance("SHA-256")
+                                .digest(it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 val data = HashMap<String, Any>()
@@ -58,7 +59,8 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256").digest(it.toByteArray(Charset.defaultCharset()))))
+                            document(String(MessageDigest.getInstance("SHA-256").
+                                digest(it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 restoreListener.onComplete(documentSnapshot.getString("seed"))
