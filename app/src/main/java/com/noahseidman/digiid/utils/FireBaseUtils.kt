@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SaveListener
+import com.pvryan.easycrypt.extensions.asHexString
 import java.io.IOException
 import java.nio.charset.Charset
 import java.security.MessageDigest
@@ -29,8 +30,8 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256")
-                                .digest(it.toByteArray(Charset.defaultCharset()))).replace("\\", "").replace("/", ""))
+                            document(MessageDigest.getInstance("SHA-256")
+                                .digest(it.toByteArray(Charset.defaultCharset())).asHexString())
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 val data = HashMap<String, Any>()
@@ -59,8 +60,8 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256").
-                                digest(it.toByteArray(Charset.defaultCharset()))).replace("\\", "").replace("/", ""))
+                            document(MessageDigest.getInstance("SHA-256").
+                                digest(it.toByteArray(Charset.defaultCharset())).asHexString())
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 restoreListener.onComplete(documentSnapshot.getString("seed"))
