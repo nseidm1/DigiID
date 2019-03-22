@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
@@ -13,9 +14,9 @@ import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SaveListener
 import java.io.IOException
 import java.nio.charset.Charset
-import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.Executors
+
 
 class FireBaseUtils {
 
@@ -29,8 +30,7 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256")
-                                .digest(it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
+                            document(String(BCrypt.withDefaults().hash(12, it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 val data = HashMap<String, Any>()
@@ -59,8 +59,7 @@ class FireBaseUtils {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
-                            document(String(MessageDigest.getInstance("SHA-256").
-                                digest(it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
+                            document(String(BCrypt.withDefaults().hash(12, it.toByteArray(Charset.defaultCharset()))).replace("[^A-Za-z0-9]".toRegex(), ""))
                         ref.get().addOnSuccessListener { documentSnapshot ->
                             if (documentSnapshot.exists()) {
                                 restoreListener.onComplete(documentSnapshot.getString("seed"))
