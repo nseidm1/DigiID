@@ -38,8 +38,7 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity android:noHistory="true"
-                  android:excludeFromRecents="true"
+        <activity android:excludeFromRecents="true"
                   android:name=".QRCodeActivity"
                   android:theme="@style/Theme.AppCompat.Translucent"/>
     </application>
