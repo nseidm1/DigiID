@@ -64,6 +64,8 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
                             restoreListener.onComplete(null)
                         }
                     })
+                } ?: run {
+                    restoreListener.onFailure()
                 }
             }
             override fun onFailure() {
