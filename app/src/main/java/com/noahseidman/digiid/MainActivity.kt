@@ -10,6 +10,7 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.widget.CompoundButton
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.biometric.BiometricPrompt
@@ -319,5 +320,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     fun restoreFailedNotification() {
         NotificationFragment.show(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
+    }
+
+    fun getProgressBar(): ProgressBar {
+        return progress
     }
 }

@@ -1,7 +1,6 @@
 package com.noahseidman.digiid.utils;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -14,14 +13,14 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 import com.crashlytics.android.Crashlytics;
 import com.jniwrappers.BRBIP32Sequence;
-import com.noahseidman.digiid.NotificationFragment;
 import com.noahseidman.digiid.MainActivity;
+import com.noahseidman.digiid.NotificationFragment;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.models.KeyModel;
 import com.noahseidman.digiid.models.MainActivityDataModel;
@@ -108,7 +107,7 @@ public class DigiID {
         }
     }
 
-    private static void digiIDSignAndRespond(@NonNull final Activity app, @NonNull String bitID,
+    private static void digiIDSignAndRespond(@NonNull final MainActivity app, @NonNull String bitID,
                                             boolean isDeepLink, String callbackUrl, byte[] seed) {
         Handler handler = new Handler(Looper.getMainLooper());
         try {
@@ -131,39 +130,43 @@ public class DigiID {
                     .post(requestBody)
                     .header("Content-Type", "application/json")
                     .build();
+            handler.post(() -> app.getProgressBar().setVisibility(View.VISIBLE));
             executor.execute(() -> {
                 final Response res = APIClient.getInstance(app).sendRequest(request);
                 Log.d(DigiID.class.getSimpleName(),
                         "Response: " + res.code() + ", Message: " + res.message());
                 if (res.code() == 200) {
-                    handler.post(
-                            () -> NotificationFragment.show((AppCompatActivity) app, app.getString(R.string.DigiIDSuccess),
-                            app.getString(R.string.Transmitting), R.raw.success_check, () -> {
-                                        if (isDeepLink) {
-                                            app.finishAffinity();
-                                        }
-                                   }));
+                    handler.post(() -> {
+                        NotificationFragment.show(app, app.getString(R.string.DigiIDSuccess), app.getString(R.string.Transmitting), R.raw.success_check, () -> {
+                            if (isDeepLink) {
+                                app.finishAffinity();
+                            }
+                        });
+                        app.getProgressBar().setVisibility(View.GONE);
+                    });
                 } else {
                     Crashlytics.getInstance().core.log("Server Response: " + res.code());
-                    handler.post(
-                            () -> NotificationFragment.show((AppCompatActivity) app,  Integer.toString(res.code()),
-                                    app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
-                                        if (isDeepLink) {
-                                            app.finishAffinity();
-                                        }
-                                    }));
+                    handler.post(() -> {
+                        NotificationFragment.show(app,  Integer.toString(res.code()), app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
+                            if (isDeepLink) {
+                                app.finishAffinity();
+                            }
+                        });
+                        app.getProgressBar().setVisibility(View.GONE);
+                    });
                 }
             });
         } catch (Exception e) {
             Crashlytics.getInstance().core.logException(e);
             e.printStackTrace();
-            handler.post(
-                    () -> NotificationFragment.show((AppCompatActivity) app, app.getString(R.string.Exception),
-                            app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
-                                if (isDeepLink) {
-                                    app.finishAffinity();
-                                }
-                            }));
+            handler.post(() ->  {
+                NotificationFragment.show(app, app.getString(R.string.Exception), app.getString(R.string.ErrorSigning), R.raw.error_check, () -> {
+                    if (isDeepLink) {
+                        app.finishAffinity();
+                    }
+                });
+                app.getProgressBar().setVisibility(View.GONE);
+            });
         }
     }
 
