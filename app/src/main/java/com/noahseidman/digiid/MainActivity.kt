@@ -20,6 +20,7 @@ import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.noahseidman.digiid.listeners.DataLoadListener
 import com.noahseidman.digiid.listeners.RestoreListener
+import com.noahseidman.digiid.listeners.SecurityPolicyCallback
 import com.noahseidman.digiid.models.MainActivityDataModel
 import com.noahseidman.digiid.utils.BiometricHelper
 import com.noahseidman.digiid.utils.DigiID
@@ -48,20 +49,17 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onRestoreClick() {
-        if (BiometricHelper.isBiometricEnabled(this)) {
-            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    handler.post { showRestoreDialog() }
-                }
-            })
-            val builder = BiometricPrompt.PromptInfo.Builder()
-            builder.setDescription(getString(R.string.PleaseProvideAuth))
-            builder.setTitle(getString(R.string.BiometricAuthRequest))
-            builder.setNegativeButtonText(getString(android.R.string.cancel))
-            prompt.authenticate(builder.build())
-        } else {
-            showRestoreDialog()
-        }
+        BiometricHelper.processSecurityPolicy(this, keyData, object: SecurityPolicyCallback {
+            override fun proceed() {
+                handler.post { showRestoreDialog() }
+            }
+            override fun getDescription(): String {
+                return getString(R.string.PleaseProvideAuth)
+            }
+            override fun getTitle(): String {
+                return getString(R.string.BiometricAuthRequest)
+            }
+        })
     }
 
     private fun showRestoreDialog() {
@@ -97,20 +95,17 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onBackupClick() {
-        if (BiometricHelper.isBiometricEnabled(this)) {
-            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    handler.post { QRCodeActivity.show(this@MainActivity, keyData.getStoredSeed(this@MainActivity)) }
-                }
-            })
-            val builder = BiometricPrompt.PromptInfo.Builder()
-            builder.setDescription(getString(R.string.PleaseProvideAuth))
-            builder.setTitle(getString(R.string.BiometricAuthRequest))
-            builder.setNegativeButtonText(getString(android.R.string.cancel))
-            prompt.authenticate(builder.build())
-        } else {
-            QRCodeActivity.show(this, keyData.getStoredSeed(this))
-        }
+        BiometricHelper.processSecurityPolicy(this, keyData, object: SecurityPolicyCallback {
+            override fun proceed() {
+                handler.post { QRCodeActivity.show(this@MainActivity, keyData.getStoredSeed(this@MainActivity)) }
+            }
+            override fun getDescription(): String {
+                return getString(R.string.PleaseProvideAuth)
+            }
+            override fun getTitle(): String {
+                return getString(R.string.BiometricAuthRequest)
+            }
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
