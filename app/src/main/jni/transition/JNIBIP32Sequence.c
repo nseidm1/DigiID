@@ -23,3 +23,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_jniwrappers_BRBIP32Sequence_bip32BitIDKey(
 
     return result;
 }
+
+JNIEXPORT jbyteArray JNICALL Java_com_jniwrappers_BRBIP32Sequence_bip32PasswordKey(JNIEnv *env, jobject thiz,
+                                                                                jbyteArray seed, jint index, jstring strUri, jint password_number) {
+    int seedLength = (*env)->GetArrayLength(env, seed);
+    const char *uri = (*env)->GetStringUTFChars(env, strUri, NULL);
+    jbyte *byteSeed = (*env)->GetByteArrayElements(env, seed, 0);
+    BRKey key;
+
+    BRBIP32PasswordKey(&key, byteSeed, (size_t) seedLength, (uint32_t) index, uri, (uint32_t) password_number);
+
+    char rawKey[BRKeyPrivKey(&key, NULL, 0)];
+    BRKeyPrivKey(&key, rawKey, sizeof(rawKey));
+    jbyteArray result = (*env)->NewByteArray(env, (jsize) sizeof(rawKey));
+    (*env)->SetByteArrayRegion(env, result, 0, (jsize) sizeof(rawKey), (jbyte *) rawKey);
+
+    return result;
+}

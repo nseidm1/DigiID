@@ -16,6 +16,13 @@ JNIEXPORT jbyteArray JNICALL Java_com_jniwrappers_BRBIP32Sequence_bip32BitIDKey(
                                                                              jint index,
                                                                              jstring strUri);
 
+JNIEXPORT jbyteArray JNICALL Java_com_jniwrappers_BRBIP32Sequence_bip32PasswordKey(JNIEnv *env,
+                                                                                jobject thiz,
+                                                                                jbyteArray seed,
+                                                                                jint index,
+                                                                                jstring strUri,
+                                                                                jint password_number);
+
 
 #ifdef __cplusplus
 }

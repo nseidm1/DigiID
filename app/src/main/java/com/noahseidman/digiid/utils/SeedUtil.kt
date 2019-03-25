@@ -15,4 +15,12 @@ object SeedUtil {
         val randomSeed = SecureRandom().generateSeed(32)
         return String(ctx.encodeSeed(randomSeed, list.toTypedArray()))
     }
+
+    fun getWordList(ctx: MainActivity): List<String> {
+        var languageCode: String? = Locale.getDefault().language
+        if (languageCode == null) {
+            languageCode = "en"
+        }
+        return Bip39Reader.bip39List(ctx, languageCode)
+    }
 }

@@ -96,6 +96,7 @@ void BRBIP32APIAuthKey(BRKey *key, const void *seed, size_t seedLen);
 
 // key used for BitID: https://github.com/bitid/bitid/blob/master/BIP_draft.md
 void BRBIP32BitIDKey(BRKey *key, const void *seed, size_t seedLen, uint32_t index, const char *uri);
+void BRBIP32PasswordKey(BRKey *key, const void *seed, size_t seedLen, uint32_t index, const char *uri, uint32_t password_number);
 
 #ifdef __cplusplus
 }

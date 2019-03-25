@@ -1,0 +1,106 @@
+package com.noahseidman.digiid.utils
+
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.net.Uri
+import android.text.TextUtils
+import com.jniwrappers.BRBIP32Sequence
+import com.noahseidman.digiid.MainActivity
+import com.noahseidman.digiid.NotificationFragment
+import com.noahseidman.digiid.R
+import com.noahseidman.digiid.models.KeyModel
+import org.bitcoinj.core.Base58
+import java.net.URI
+import java.util.*
+
+
+object DigiPassword {
+
+    fun isDigiPassword(uri: String): Boolean {
+        try {
+            val bitIdUri = URI(uri)
+            if ("digipassword".equals(bitIdUri.scheme, ignoreCase = true)) {
+                return true
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+
+        return false
+    }
+
+    fun show(context: MainActivity, seed: String, url: String) {
+        val uri = Uri.parse(url)
+        val domain = uri.host
+        val urlParts = url.split(domain)
+        var account: String? = null
+        if (urlParts.size > 1) {
+            account = urlParts[1]
+        }
+        val password = getPassword(context, seed, domain, getPasswordNumber(account))
+        val showBuilder = AlertDialog.Builder(context)
+        showBuilder.setTitle(R.string.ShowSeedPhrase)
+        showBuilder.setIcon(R.drawable.ic_digiid)
+        showBuilder.setMessage(password)
+        showBuilder.setNegativeButton(android.R.string.cancel) { dialog, which -> }
+        showBuilder.setPositiveButton(R.string.Copy) { dialog, which ->
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(context.getString(R.string.DigiIDSeedPhrase), password)
+            clipboard.primaryClip = clip
+            NotificationFragment.show(context, context.getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+        }
+        showBuilder.show()
+    }
+
+    @ExperimentalUnsignedTypes
+    fun getPassword(context: MainActivity, seedPhrase: String, domain: String, password_number: Int): String {
+        //calculate sudo random number
+        val seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
+        val address = KeyModel(BRBIP32Sequence.getInstance().bip32PasswordKey(seed, 0, domain, password_number)).address()
+        val key = Base58.decode(address)
+        val seudoRandom = IntArray(20)
+        for (i in 1..20) {
+            seudoRandom[i - 1] = toUnsignedInt(key[i])
+        }
+        //generate a password based on seudoRandom
+        val parts = ArrayList<String>()
+        val wordList = SeedUtil.getWordList(context)
+        for (i in 0..3) {
+            val part = seudoRandom[i * 2] * 0x100 + seudoRandom[i * 2 + 1]
+            var word = wordList[part % 2048]
+            if (part >= 0x8000) {
+                word = word.substring(0, 1).toUpperCase() + word.substring(1) //upper case if msb is 1
+            }
+            parts.add(word)
+            parts.add("")
+        }
+        //put symbol in remaining places
+        val symbol = "!@#\$%^&*-".get((seudoRandom[10] % 8))
+        for (i in 1..8 step 2) {
+            parts[i] = symbol.toString();
+        }
+        //add a 10 bit number in any of the 4 spaces
+        val part = seudoRandom[8] * 0x100 + seudoRandom[9]
+        val num = part % 1024
+        val loc = (part / 0x4000) * 2 + 1
+        val aParts = parts.toTypedArray()
+        aParts[loc] = Integer.toString(num)
+        //13*4 bits four word parts
+        //10 bits for number
+        //2 bits for location of number
+        //3 bits for symbol
+        //total 67
+        return TextUtils.join("", aParts)
+    }
+
+    fun toUnsignedInt(x: Byte): Int {
+        return x.toInt() and 0xff
+    }
+
+    fun getPasswordNumber(account: String?): Int {
+        return 0
+    }
+}
+

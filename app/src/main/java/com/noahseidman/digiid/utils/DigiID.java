@@ -38,7 +38,7 @@ public class DigiID {
     private static final String BITCOIN_SIGNED_MESSAGE_HEADER = "DigiByte Signed Message:\n";
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public static boolean isBitId(String uri) {
+    public static boolean isDigiID(String uri) {
         try {
             URI bitIdUri = new URI(uri);
             if ("digiid".equalsIgnoreCase(bitIdUri.getScheme())) {

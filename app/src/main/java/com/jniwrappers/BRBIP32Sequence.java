@@ -40,4 +40,5 @@ public class BRBIP32Sequence {
     }
 
     public native byte[] bip32BitIDKey(byte[] seed, int index, String uri);
+    public native byte[] bip32PasswordKey(byte[] seed, int index, String uri, int password_number);
 }

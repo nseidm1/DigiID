@@ -22,10 +22,7 @@ import com.noahseidman.digiid.listeners.DataLoadListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SecurityPolicyCallback
 import com.noahseidman.digiid.models.MainActivityDataModel
-import com.noahseidman.digiid.utils.BiometricHelper
-import com.noahseidman.digiid.utils.DigiID
-import com.noahseidman.digiid.utils.FireBaseUtils
-import com.noahseidman.digiid.utils.QRUtils
+import com.noahseidman.digiid.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.util.*
@@ -157,7 +154,11 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                         handler.postDelayed({
                             val result = intent?.getStringExtra("SCAN_RESULT")
                             result?.let {
-                                DigiID.digiIDAuthPrompt(this, it, false, keyData)
+                                if (DigiID.isDigiID(it)) {
+                                    DigiID.digiIDAuthPrompt(this, it, false, keyData)
+                                } else if (DigiPassword.isDigiPassword(it)) {
+                                    DigiPassword.show(this@MainActivity, keyData.seed, it)
+                                }
                             }
                         }, 500)
                     }
@@ -245,8 +246,10 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     private fun processDeepLink(@Nullable uriString : String?) {
         uriString?.let {
-            if (DigiID.isBitId(it)) {
+            if (DigiID.isDigiID(it)) {
                 DigiID.digiIDAuthPrompt(this, it, true, keyData)
+            } else if (DigiPassword.isDigiPassword(it)) {
+                DigiPassword.show(this@MainActivity, keyData.seed, it)
             }
         }
     }

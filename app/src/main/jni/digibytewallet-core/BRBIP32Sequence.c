@@ -286,3 +286,22 @@ void BRBIP32BitIDKey(BRKey *key, const void *seed, size_t seedLen, uint32_t inde
     }
 }
 
+void BRBIP32PasswordKey(BRKey *key, const void *seed, size_t seedLen, uint32_t index, const char *uri, __u32 password_number)
+{
+    assert(key != NULL);
+    assert(seed != NULL || seedLen == 0);
+    assert(uri != NULL);
+
+    if (key && (seed || seedLen == 0) && uri) {
+        UInt256 hash;
+        size_t uriLen = strlen(uri);
+        uint8_t data[sizeof(index) + uriLen];
+
+        UInt32SetLE(data, index);
+        memcpy(&data[sizeof(index)], uri, uriLen);
+        BRSHA256(&hash, data, sizeof(data));
+        BRBIP32PrivKeyPath(key, seed, seedLen, 6, 13 | BIP32_HARD, UInt32GetLE(&hash.u32[0]) | BIP32_HARD,
+                           UInt32GetLE(&hash.u32[1]) | BIP32_HARD, UInt32GetLE(&hash.u32[2]) | BIP32_HARD,
+                           UInt32GetLE(&hash.u32[3]) | BIP32_HARD, password_number | BIP32_HARD); // path m/13H/aH/bH/cH/dH
+    }
+}
