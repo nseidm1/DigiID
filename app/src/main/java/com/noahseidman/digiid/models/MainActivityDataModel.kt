@@ -1,6 +1,8 @@
 package com.noahseidman.digiid.models
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.preference.PreferenceManager
 import com.noahseidman.digiid.MainActivity
 import com.noahseidman.digiid.interfaces.DataStore
@@ -13,6 +15,8 @@ import com.pvryan.easycrypt.ECResultListener
 import com.pvryan.easycrypt.symmetric.ECSymmetric
 
 data class MainActivityDataModel(var seed: String = String()) : DataStore {
+
+    val handler: Handler = Handler(Looper.getMainLooper())
 
     override fun save(context: MainActivity, saveListener: SaveListener) {
         FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
@@ -85,22 +89,22 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
                             override fun onProgress(i: Int, l: Long, l1: Long) {}
                             override fun <T> onSuccess(result: T) {
                                 seed = result as String
-                                restoreListener.onComplete(seed)
+                                handler.post { restoreListener.onComplete(seed) }
                             }
                             override fun onFailure(s: String, e: Exception) {
                                 seed = SeedUtil.generateRandomSeed(context)
                                 save(context, object : SaveListener {
                                     override fun onComplete() {
-                                        restoreListener.onComplete(seed)
+                                        handler.post { restoreListener.onComplete(seed) }
                                     }
                                     override fun onFailure() {
-                                        restoreListener.onFailure()
+                                        handler.post { restoreListener.onFailure() }
                                     }
                                 })
                             }
                         })
                     } else {
-                        restoreListener.onComplete(seed)
+                        handler.post { restoreListener.onComplete(seed) }
                     }
                 }
             }
