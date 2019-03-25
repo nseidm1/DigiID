@@ -33,28 +33,29 @@ object DigiPassword {
 
     fun show(context: MainActivity, seed: String, url: String) {
         val uri = Uri.parse(url)
-        val domain = uri.host
-        val urlParts = url.split(domain)
-        var account: String? = null
-        if (urlParts.size > 1) {
-            account = urlParts[1]
+        val domain: String? = uri.host
+        domain?.let {
+            val urlParts = url.split(it)
+            var account: String? = null
+            if (urlParts.size > 1) {
+                account = urlParts[1]
+            }
+            val password = getPassword(context, seed, it, getPasswordNumber(account))
+            val showBuilder = AlertDialog.Builder(context)
+            showBuilder.setTitle(R.string.ShowSeedPhrase)
+            showBuilder.setIcon(R.drawable.ic_digiid)
+            showBuilder.setMessage(password)
+            showBuilder.setNegativeButton(android.R.string.cancel) { dialog, which -> }
+            showBuilder.setPositiveButton(R.string.Copy) { dialog, which ->
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText(context.getString(R.string.DigiIDSeedPhrase), password)
+                clipboard.primaryClip = clip
+                NotificationFragment.show(context, context.getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+            }
+            showBuilder.show()
         }
-        val password = getPassword(context, seed, domain, getPasswordNumber(account))
-        val showBuilder = AlertDialog.Builder(context)
-        showBuilder.setTitle(R.string.ShowSeedPhrase)
-        showBuilder.setIcon(R.drawable.ic_digiid)
-        showBuilder.setMessage(password)
-        showBuilder.setNegativeButton(android.R.string.cancel) { dialog, which -> }
-        showBuilder.setPositiveButton(R.string.Copy) { dialog, which ->
-            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText(context.getString(R.string.DigiIDSeedPhrase), password)
-            clipboard.primaryClip = clip
-            NotificationFragment.show(context, context.getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
-        }
-        showBuilder.show()
     }
 
-    @ExperimentalUnsignedTypes
     fun getPassword(context: MainActivity, seedPhrase: String, domain: String, password_number: Int): String {
         //calculate sudo random number
         val seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
