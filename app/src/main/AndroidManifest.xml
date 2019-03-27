@@ -45,7 +45,6 @@
             </intent-filter>
         </activity>
         <activity android:excludeFromRecents="true"
-                  android:screenOrientation="portrait"
                   android:name=".QRCodeActivity"
                   android:theme="@style/Theme.AppCompat.Translucent"/>
         <activity android:name="com.google.zxing.client.android.encode.EncodeActivity"
