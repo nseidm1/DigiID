@@ -162,7 +162,7 @@ object DigiPassword {
             val res = APIClient.getInstance(context).sendRequest(request)
             if (res.code() == 200 || res.code() == 201) {
                 handler.post {
-                    NotificationFragment.show(context, context.getString(R.string.DigiIDSuccess), context.getString(R.string.Transmitting), R.raw.success_check) {}
+                    NotificationFragment.show(context, context.getString(R.string.DigiPasswordSuccess), context.getString(R.string.Transmitting), R.raw.success_check) {}
                     context.progress.visibility = View.INVISIBLE
                 }
             } else {
