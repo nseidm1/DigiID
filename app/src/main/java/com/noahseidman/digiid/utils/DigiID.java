@@ -109,7 +109,7 @@ public class DigiID {
                                 app.finishAffinity();
                             }
                         });
-                        app.getProgressBar().setVisibility(View.GONE);
+                        app.getProgressBar().setVisibility(View.INVISIBLE);
                     });
                 } else {
                     Crashlytics.getInstance().core.log("Server Response: " + res.code());
@@ -119,7 +119,7 @@ public class DigiID {
                                 app.finishAffinity();
                             }
                         });
-                        app.getProgressBar().setVisibility(View.GONE);
+                        app.getProgressBar().setVisibility(View.INVISIBLE);
                     });
                 }
             });
@@ -132,7 +132,7 @@ public class DigiID {
                         app.finishAffinity();
                     }
                 });
-                app.getProgressBar().setVisibility(View.GONE);
+                app.getProgressBar().setVisibility(View.INVISIBLE);
             });
         }
     }

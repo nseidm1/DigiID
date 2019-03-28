@@ -138,13 +138,13 @@ object DigiPassword {
             if (res.code() == 200 || res.code() == 201) {
                 handler.post {
                     NotificationFragment.show(context, context.getString(R.string.DigiIDSuccess), context.getString(R.string.Transmitting), R.raw.success_check) {}
-                    context.progress.visibility = View.GONE
+                    context.progress.visibility = View.INVISIBLE
                 }
             } else {
                 Crashlytics.getInstance().core.log("Server Response: " + res.code())
                 handler.post {
                     NotificationFragment.show(context, Integer.toString(res.code()), context.getString(R.string.ErrorSigning), R.raw.error_check) {}
-                    context.progress.visibility = View.GONE
+                    context.progress.visibility = View.INVISIBLE
                 }
             }
         }
