@@ -33,4 +33,9 @@
     <string name="CopiedToClipboard">Copied to Clipboard</string>
     <string name="DigiIDSeedPhrase">DigiID Seed Phrase</string>
     <string name="CopyFailed">Copy Failed</string>
+    <string name="DigiPassword">DigiPassword</string>
+    <string name="DigiPasswordDescription">Use Simple to copy your password to the clipboard, or Advanced for more options</string>
+    <string name="Simple">Simple</string>
+    <string name="Advanced">Advanced</string>
+    <string name="Send">Send</string>
 </resources>

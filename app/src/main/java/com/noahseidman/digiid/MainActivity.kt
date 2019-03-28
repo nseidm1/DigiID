@@ -3,8 +3,9 @@ package com.noahseidman.digiid
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.PendingIntent
-import android.content.Intent
+import android.content.*
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -138,7 +139,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         super.onNewIntent(intent)
         intent?.let {
             getData(DataLoadListener {
-                processDeepLink(it.data?.toString())
+                processDeepLink(it.data?.toString(), it.getStringExtra(Intent.EXTRA_TEXT))
                 processNFC(it.getParcelableExtra(NfcAdapter.EXTRA_TAG))
                 setIntent(null)
             })
@@ -244,13 +245,37 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    private fun processDeepLink(@Nullable uriString : String?) {
+    private fun processDeepLink(@Nullable uriString : String?, @Nullable shareUrl: String?) {
         uriString?.let {
             if (DigiID.isDigiID(it)) {
                 DigiID.digiIDAuthPrompt(this, it, true, keyData)
             } else if (DigiPassword.isDigiPassword(it)) {
                 DigiPassword.show(this@MainActivity, keyData.seed, it)
             }
+        }
+        shareUrl?.let {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(R.string.DigiPassword)
+            builder.setIcon(R.drawable.ic_digiid)
+            val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, it, 0)
+            builder.setMessage(getString(R.string.DigiPasswordDescription) + "\n\n" + password)
+            builder.setNegativeButton(R.string.Simple, object:DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText(getString(R.string.DigiPassword), password)
+                    clipboard.primaryClip = clip
+                    NotificationFragment.show(this@MainActivity, getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+                }
+            })
+            builder.setPositiveButton(R.string.Advanced, object: DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    val i = Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=" + it))
+                    startActivity(i);
+                }
+            })
+            builder.setNeutralButton(R.string.Cancel, null)
+            builder.show()
         }
     }
 
