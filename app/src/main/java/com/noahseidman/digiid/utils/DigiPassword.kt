@@ -15,6 +15,7 @@ import com.jniwrappers.BRBIP32Sequence
 import com.noahseidman.digiid.MainActivity
 import com.noahseidman.digiid.NotificationFragment
 import com.noahseidman.digiid.R
+import com.noahseidman.digiid.listeners.SecurityPolicyCallback
 import com.noahseidman.digiid.models.KeyModel
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.MultipartBody
@@ -42,13 +43,37 @@ object DigiPassword {
         return false
     }
 
-    fun show(context: MainActivity, seed: String, url: String) {
+    fun digiPasswordAuthPrompt(context: MainActivity, seed: String, url: String) {
+        val uri = Uri.parse(url)
+        val domain: String? = uri.host
+        domain?.let {
+            BiometricHelper.processSecurityPolicy(context, object : SecurityPolicyCallback {
+                override fun proceed() {
+                    Handler(Looper.getMainLooper()).post {
+                        show(context, seed, url)
+                    }
+                }
+
+                override fun getDescription(): String {
+                    return it
+                }
+
+                override fun getTitle(): String {
+                    return context.getString(R.string.BiometricAuthRequest)
+                }
+            })
+        } ?: run {
+            NotificationFragment.show(context, context.getString(R.string.InvalidWebsite), "", R.raw.error_check, null)
+        }
+    }
+
+    private fun show(context: MainActivity, seed: String, url: String) {
         val uri = Uri.parse(url)
         val domain: String? = uri.host
         domain?.let {
             val password = getPassword(context, seed, it, getPasswordNumber(null))
             val showBuilder = AlertDialog.Builder(context)
-            showBuilder.setTitle(R.string.ShowSeedPhrase)
+            showBuilder.setTitle(R.string.Password)
             showBuilder.setIcon(R.drawable.ic_digiid)
             showBuilder.setMessage(password)
             showBuilder.setNeutralButton(android.R.string.cancel) { dialog, which -> }

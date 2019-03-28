@@ -25,8 +25,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
@@ -35,7 +33,6 @@ import androidx.biometric.BiometricPrompt;
 import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.listeners.SecurityPolicyCallback;
-import com.noahseidman.digiid.models.MainActivityDataModel;
 
 import java.util.concurrent.Executors;
 
@@ -65,9 +62,8 @@ public class BiometricHelper extends FingerprintManager.AuthenticationCallback {
         editor.apply();
     }
 
-    public static void processSecurityPolicy(MainActivity context, MainActivityDataModel keyData, SecurityPolicyCallback securityPolicyCallback) {
+    public static void processSecurityPolicy(MainActivity context, SecurityPolicyCallback securityPolicyCallback) {
         KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        Handler handler = new Handler(Looper.getMainLooper());
         if (!BiometricHelper.biometricAvailable(context)) {
             if (keyguardManager.isKeyguardSecure()) {
                 securityPolicyCallback.proceed();

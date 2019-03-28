@@ -47,7 +47,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onRestoreClick() {
-        BiometricHelper.processSecurityPolicy(this, keyData, object: SecurityPolicyCallback {
+        BiometricHelper.processSecurityPolicy(this, object: SecurityPolicyCallback {
             override fun proceed() {
                 handler.post { showRestoreDialog() }
             }
@@ -93,7 +93,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onBackupClick() {
-        BiometricHelper.processSecurityPolicy(this, keyData, object: SecurityPolicyCallback {
+        BiometricHelper.processSecurityPolicy(this, object: SecurityPolicyCallback {
             override fun proceed() {
                 handler.post { QRCodeActivity.show(this@MainActivity, keyData.getStoredSeed(this@MainActivity)) }
             }
@@ -158,7 +158,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                                 if (DigiID.isDigiID(it)) {
                                     DigiID.digiIDAuthPrompt(this, it, false, keyData)
                                 } else if (DigiPassword.isDigiPassword(it)) {
-                                    DigiPassword.show(this@MainActivity, keyData.seed, it)
+                                    DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it)
                                 }
                             }
                         }, 500)
@@ -250,7 +250,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
             if (DigiID.isDigiID(it)) {
                 DigiID.digiIDAuthPrompt(this, it, true, keyData)
             } else if (DigiPassword.isDigiPassword(it)) {
-                DigiPassword.show(this@MainActivity, keyData.seed, it)
+                DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it)
             }
         }
         shareUrl?.let {

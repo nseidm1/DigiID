@@ -38,4 +38,6 @@
     <string name="Simple">Simple</string>
     <string name="Advanced">Advanced</string>
     <string name="Send">Send</string>
+    <string name="InvalidWebsite">Invalid Website</string>
+    <string name="Password">Password</string>
 </resources>

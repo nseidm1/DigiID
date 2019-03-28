@@ -54,7 +54,7 @@ public class DigiID {
     public static void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, @NonNull MainActivityDataModel keyData) {
         Uri bitUri = Uri.parse(bitID);
         String scheme = "https://";
-        BiometricHelper.processSecurityPolicy(context, keyData, new SecurityPolicyCallback() {
+        BiometricHelper.processSecurityPolicy(context, new SecurityPolicyCallback() {
             @Override
             public void proceed() {
                 new Handler(Looper.getMainLooper()).post(() -> {
