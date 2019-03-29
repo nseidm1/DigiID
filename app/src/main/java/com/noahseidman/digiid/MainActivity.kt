@@ -190,35 +190,39 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                     }
                     SELECT_IMAGE_RESTORE -> {
                         intent?.data?.let {
-                            val inputStream: InputStream = contentResolver.openInputStream(it)!!
-                            val rawBytes = ByteStreams.toByteArray(inputStream)
-                            val bMap = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.size)
-                            val intArray = IntArray(bMap.width * bMap.height)
-                            bMap.getPixels(intArray, 0, bMap.width, 0, 0, bMap.width, bMap.height)
+                            try {
+                                val inputStream: InputStream = contentResolver.openInputStream(it)!!
+                                val rawBytes = ByteStreams.toByteArray(inputStream)
+                                val bMap = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.size)
+                                val intArray = IntArray(bMap.width * bMap.height)
+                                bMap.getPixels(intArray, 0, bMap.width, 0, 0, bMap.width, bMap.height)
 
-                            val source = RGBLuminanceSource(bMap.width, bMap.height, intArray)
-                            val bitmap = BinaryBitmap(HybridBinarizer(source))
+                                val source = RGBLuminanceSource(bMap.width, bMap.height, intArray)
+                                val bitmap = BinaryBitmap(HybridBinarizer(source))
 
-                            val hintsMap = EnumMap<DecodeHintType, Any>(DecodeHintType::class.java)
-                            hintsMap[DecodeHintType.TRY_HARDER] = java.lang.Boolean.TRUE
-                            hintsMap[DecodeHintType.POSSIBLE_FORMATS] = EnumSet.allOf(BarcodeFormat::class.java)
-                            hintsMap[DecodeHintType.PURE_BARCODE] = java.lang.Boolean.FALSE
+                                val hintsMap = EnumMap<DecodeHintType, Any>(DecodeHintType::class.java)
+                                hintsMap[DecodeHintType.TRY_HARDER] = java.lang.Boolean.TRUE
+                                hintsMap[DecodeHintType.POSSIBLE_FORMATS] = EnumSet.allOf(BarcodeFormat::class.java)
+                                hintsMap[DecodeHintType.PURE_BARCODE] = java.lang.Boolean.FALSE
 
-                            val reader = MultiFormatReader()
-                            val result = reader.decode(bitmap, hintsMap)
+                                val reader = MultiFormatReader()
+                                val result = reader.decode(bitmap, hintsMap)
 
-                            this.keyData.restore(this, result.text, object : RestoreListener {
-                                override fun onComplete(seed: String?) {
-                                    seed?.let {
-                                        restoreSuccessNotification()
-                                    } ?: run {
+                                this.keyData.restore(this, result.text, object : RestoreListener {
+                                    override fun onComplete(seed: String?) {
+                                        seed?.let {
+                                            restoreSuccessNotification()
+                                        } ?: run {
+                                            restoreFailedNotification()
+                                        }
+                                    }
+                                    override fun onFailure() {
                                         restoreFailedNotification()
                                     }
-                                }
-                                override fun onFailure() {
-                                    restoreFailedNotification()
-                                }
-                            })
+                                })
+                            } catch(e: Exception) {
+                                NotificationFragment.show(this@MainActivity, getString(R.string.InvalidQR), "", R.raw.error_check) {}
+                            }
                         }
                     }
                     FIREBASE_RESTORE -> {
