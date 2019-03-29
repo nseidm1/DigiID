@@ -136,11 +136,13 @@ object DigiPassword {
         val s = uri.getQueryParameter("s")
         val nonce = uri.getQueryParameter("x")
         val p = uri.getQueryParameter("p")
-
-        if (s.isNullOrEmpty() || nonce.isNullOrEmpty() || p.isNullOrEmpty()) throw IllegalArgumentException()
-        if (s.length != 44) throw IllegalArgumentException()
-        if (nonce.length < 10) throw IllegalArgumentException()
-
+        val handler = Handler(Looper.getMainLooper())
+        if (s.isNullOrEmpty() || nonce.isNullOrEmpty() || p.isNullOrEmpty() || s.length != 44 || nonce.length < 10)  {
+            handler.post {
+                NotificationFragment.show(context, context.getString(R.string.InvalidWebsite), "", R.raw.error_check, null)
+            }
+            return
+        }
         val key = toUnsignedByteArray(Utils.HEX.decode(s))
         val callback = "https://$p"
         Log.d("DigiPassword", callback)
@@ -155,7 +157,6 @@ object DigiPassword {
 
         val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("x", nonce).addFormDataPart("p", Utils.HEX.encode(payload)).build();
         val request = Request.Builder().url(callback).post(requestBody).build()
-        val handler = Handler(Looper.getMainLooper())
         val executor = Executors.newSingleThreadExecutor()
         handler.post { context.progress.visibility = View.VISIBLE }
         executor.execute {
