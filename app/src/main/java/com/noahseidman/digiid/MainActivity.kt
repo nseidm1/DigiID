@@ -3,13 +3,17 @@ package com.noahseidman.digiid
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.PendingIntent
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.CompoundButton
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -256,28 +260,38 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
             }
         }
         shareUrl?.let {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle(R.string.DigiPassword)
-            builder.setIcon(R.drawable.ic_digiid)
-            val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, it, 0)
-            builder.setMessage(getString(R.string.DigiPasswordDescription) + "\n\n" + password)
-            builder.setNegativeButton(R.string.Simple, object:DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface?, which: Int) {
-                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText(getString(R.string.DigiPassword), password)
-                    clipboard.primaryClip = clip
-                    NotificationFragment.show(this@MainActivity, getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+            BiometricHelper.processSecurityPolicy(this, object : SecurityPolicyCallback {
+                override fun proceed() {
+                    Handler(Looper.getMainLooper()).post {
+                        val builder = AlertDialog.Builder(this@MainActivity)
+                        builder.setTitle(R.string.DigiPassword)
+                        builder.setIcon(R.drawable.ic_digiid)
+                        val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, it, 0)
+                        builder.setMessage(password)
+                        builder.setPositiveButton(R.string.Copy) { dialog, which ->
+                            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText(getString(R.string.DigiPassword), password)
+                            clipboard.primaryClip = clip
+                            NotificationFragment.show(this@MainActivity, getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+                        }
+//                        builder.setNegativeButton(R.string.Advanced) { dialog, which ->
+//                            val i = Intent(Intent.ACTION_VIEW);
+//                            i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=$it"))
+//                            startActivity(i);
+//                        }
+                        builder.setNegativeButton(R.string.Cancel, null)
+                        builder.show()
+                    }
+                }
+                override fun getDescription(): String {
+                    return it
+                }
+                override fun getTitle(): String {
+                    return getString(R.string.BiometricAuthRequest)
+                }
+                override fun failed() {
                 }
             })
-            builder.setPositiveButton(R.string.Advanced, object: DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface?, which: Int) {
-                    val i = Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=" + it))
-                    startActivity(i);
-                }
-            })
-            builder.setNeutralButton(R.string.Cancel, null)
-            builder.show()
         }
     }
 
