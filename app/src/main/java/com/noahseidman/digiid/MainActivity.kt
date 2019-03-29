@@ -14,7 +14,6 @@ import android.widget.CompoundButton
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.Nullable
-import androidx.biometric.BiometricPrompt
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
 import com.google.zxing.*
@@ -27,7 +26,6 @@ import com.noahseidman.digiid.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
 import java.util.*
-import java.util.concurrent.Executors
 
 
 class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
@@ -56,6 +54,8 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
             }
             override fun getTitle(): String {
                 return getString(R.string.BiometricAuthRequest)
+            }
+            override fun failed() {
             }
         })
     }
@@ -102,6 +102,8 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
             }
             override fun getTitle(): String {
                 return getString(R.string.BiometricAuthRequest)
+            }
+            override fun failed() {
             }
         })
     }
@@ -310,28 +312,26 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
         if (!isChecked) {
-            val prompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            BiometricHelper.processSecurityPolicy(this, object : SecurityPolicyCallback {
+                override fun getDescription(): String {
+                    return getString(R.string.PleaseProvideAuth)
+                }
+
+                override fun getTitle(): String {
+                    return getString(R.string.BiometricAuthRequest)
+                }
+
+                override fun proceed() {
                     handler.post { BiometricHelper.enableBiometric(this@MainActivity, false) }
                 }
-                override fun onAuthenticationFailed() {
-                    handler.post {
-                        BiometricHelper.enableBiometric(this@MainActivity, true)
-                        biometric_switch.isChecked = true
-                    }
-                }
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+
+                override fun failed() {
                     handler.post {
                         BiometricHelper.enableBiometric(this@MainActivity, true)
                         biometric_switch.isChecked = true
                     }
                 }
             })
-            val builder = BiometricPrompt.PromptInfo.Builder()
-            builder.setDescription(getString(R.string.PleaseProvideAuth))
-            builder.setTitle(getString(R.string.BiometricAuthRequest))
-            builder.setNegativeButtonText(getString(android.R.string.cancel))
-            prompt.authenticate(builder.build())
         } else {
             BiometricHelper.enableBiometric(this@MainActivity, isChecked)
         }

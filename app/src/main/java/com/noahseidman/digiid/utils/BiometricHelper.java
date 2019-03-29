@@ -29,7 +29,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.biometric.BiometricPrompt;
+import androidx.biometrics.BiometricPrompt;
 import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.listeners.SecurityPolicyCallback;
@@ -81,6 +81,16 @@ public class BiometricHelper extends FingerprintManager.AuthenticationCallback {
                 @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     securityPolicyCallback.proceed();
+                }
+
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                    securityPolicyCallback.failed();
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    securityPolicyCallback.failed();
                 }
             });
             BiometricPrompt.PromptInfo.Builder builder = new BiometricPrompt.PromptInfo.Builder();

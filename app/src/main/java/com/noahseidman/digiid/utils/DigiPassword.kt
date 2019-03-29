@@ -53,13 +53,13 @@ object DigiPassword {
                         show(context, seed, url)
                     }
                 }
-
                 override fun getDescription(): String {
                     return it
                 }
-
                 override fun getTitle(): String {
                     return context.getString(R.string.BiometricAuthRequest)
+                }
+                override fun failed() {
                 }
             })
         } ?: run {

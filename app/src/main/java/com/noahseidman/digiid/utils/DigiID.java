@@ -71,6 +71,10 @@ public class DigiID {
             public String getTitle() {
                 return context.getString(R.string.BiometricAuthRequest);
             }
+            @Override
+            public void failed() {
+
+            }
         });
     }
 
