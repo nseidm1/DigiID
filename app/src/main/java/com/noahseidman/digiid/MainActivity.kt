@@ -295,7 +295,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             }
                             builder.setPositiveButton(R.string.Advanced) { dialog, which ->
                                 val i = Intent(Intent.ACTION_VIEW);
-                                i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=$shareUrl"))
+                                i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=$it"))
                                 startActivity(i);
                             }
 
