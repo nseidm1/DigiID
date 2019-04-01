@@ -8,6 +8,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import com.firebase.ui.auth.AuthUI
 import com.google.common.io.ByteStreams
+import com.google.common.net.InternetDomainName
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 import com.noahseidman.digiid.listeners.DataLoadListener
@@ -164,7 +166,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                                 if (DigiID.isDigiID(it)) {
                                     DigiID.digiIDAuthPrompt(this, it, false, keyData)
                                 } else if (DigiPassword.isDigiPassword(it)) {
-                                    DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it)
+                                    DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, false)
                                 }
                             }
                         }, 500)
@@ -255,47 +257,66 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         }
     }
 
-    private fun processDeepLink(@Nullable uriString : String?, @Nullable shareUrl: String?) {
+    private fun processDeepLink(@Nullable uriString: String?, @Nullable shareUrl: String?) {
         uriString?.let {
             if (DigiID.isDigiID(it)) {
                 DigiID.digiIDAuthPrompt(this, it, true, keyData)
             } else if (DigiPassword.isDigiPassword(it)) {
-                DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it)
+                DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, true)
             }
         }
         shareUrl?.let {
-            BiometricHelper.processSecurityPolicy(this, object : SecurityPolicyCallback {
-                override fun proceed() {
-                    Handler(Looper.getMainLooper()).post {
-                        val builder = AlertDialog.Builder(this@MainActivity)
-                        builder.setTitle(R.string.DigiPassword)
-                        builder.setIcon(R.drawable.ic_digiid)
-                        val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, it, 0)
-                        builder.setMessage(password)
-                        builder.setPositiveButton(R.string.Copy) { dialog, which ->
-                            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText(getString(R.string.DigiPassword), password)
-                            clipboard.primaryClip = clip
-                            NotificationFragment.show(this@MainActivity, getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
+            var uri: Uri? = null
+            try {
+                uri = Uri.parse(it)
+            } catch (e: Exception) {
+            }
+            uri?.host?.let {
+                val url = InternetDomainName.from(it).topPrivateDomain().toString().split(".")[0]
+                BiometricHelper.processSecurityPolicy(this@MainActivity, object : SecurityPolicyCallback {
+                    override fun proceed() {
+                        Handler(Looper.getMainLooper()).post {
+                            val builder = AlertDialog.Builder(this@MainActivity)
+                            builder.setTitle(R.string.DigiPassword)
+                            builder.setIcon(R.drawable.ic_digiid)
+                            val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, url, 0)
+                            builder.setMessage(password)
+                            builder.setNegativeButton(R.string.Copy) { dialog, which ->
+                                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText(getString(R.string.DigiPassword), password)
+                                clipboard.primaryClip = clip
+                                NotificationFragment.show(
+                                    this@MainActivity,
+                                    getString(R.string.CopiedToClipboard),
+                                    "",
+                                    R.raw.success_check,
+                                    null
+                                )
+                            }
+                            builder.setPositiveButton(R.string.Advanced) { dialog, which ->
+                                val i = Intent(Intent.ACTION_VIEW);
+                                i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=$shareUrl"))
+                                startActivity(i);
+                            }
+
+                            builder.setNeutralButton(R.string.Cancel, null)
+                            builder.show()
                         }
-//                        builder.setNegativeButton(R.string.Advanced) { dialog, which ->
-//                            val i = Intent(Intent.ACTION_VIEW);
-//                            i.setData(Uri.parse("https://www.openantumid.com/digipassword.php?generate=$it"))
-//                            startActivity(i);
-//                        }
-                        builder.setNegativeButton(R.string.Cancel, null)
-                        builder.show()
                     }
-                }
-                override fun getDescription(): String {
-                    return it
-                }
-                override fun getTitle(): String {
-                    return getString(R.string.BiometricAuthRequest)
-                }
-                override fun failed() {
-                }
-            })
+
+                    override fun getDescription(): String {
+                        return url
+                    }
+
+                    override fun getTitle(): String {
+                        return getString(R.string.BiometricAuthRequest)
+                    }
+
+                    override fun failed() {
+                    }
+                })
+
+            }
         }
     }
 

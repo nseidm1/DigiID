@@ -43,14 +43,14 @@ object DigiPassword {
         return false
     }
 
-    fun digiPasswordAuthPrompt(context: MainActivity, seed: String, url: String) {
+    fun digiPasswordAuthPrompt(context: MainActivity, seed: String, url: String, deeplink: Boolean) {
         val uri = Uri.parse(url)
         val domain: String? = uri.host
         domain?.let {
             BiometricHelper.processSecurityPolicy(context, object : SecurityPolicyCallback {
                 override fun proceed() {
                     Handler(Looper.getMainLooper()).post {
-                        show(context, seed, url)
+                        show(context, seed, url, deeplink)
                     }
                 }
                 override fun getDescription(): String {
@@ -67,7 +67,7 @@ object DigiPassword {
         }
     }
 
-    private fun show(context: MainActivity, seed: String, url: String) {
+    private fun show(context: MainActivity, seed: String, url: String, deeplink: Boolean) {
         val uri = Uri.parse(url)
         val domain: String? = uri.host
         domain?.let {
@@ -76,16 +76,19 @@ object DigiPassword {
             showBuilder.setTitle(R.string.Password)
             showBuilder.setIcon(R.drawable.ic_digiid)
             showBuilder.setMessage(password)
-            showBuilder.setNeutralButton(android.R.string.cancel) { dialog, which -> }
             showBuilder.setPositiveButton(R.string.Copy) { dialog, which ->
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText(context.getString(R.string.DigiIDSeedPhrase), password)
                 clipboard.primaryClip = clip
                 NotificationFragment.show(context, context.getString(R.string.CopiedToClipboard), "", R.raw.success_check, null)
             }
-            showBuilder.setNegativeButton(R.string.Send) { dialog, which ->
-                sendResponse(context, url, seed, it, 0)
-
+            if (!deeplink) {
+                showBuilder.setNegativeButton(R.string.Send) { dialog, which ->
+                    sendResponse(context, url, seed, it, 0)
+                }
+                showBuilder.setNeutralButton(android.R.string.cancel) { dialog, which -> }
+            } else {
+                showBuilder.setNegativeButton(android.R.string.cancel) { dialog, which -> }
             }
             showBuilder.show()
         }
