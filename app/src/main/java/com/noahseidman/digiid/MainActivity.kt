@@ -1,5 +1,6 @@
 package com.noahseidman.digiid
 
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.PendingIntent
@@ -15,6 +16,8 @@ import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import android.widget.CompoundButton
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -38,11 +41,10 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     private val SELECT_IMAGE_RESTORE = 4334
     private val FIREBASE_RESTORE = 32443
+    val OVERLAY_SETTING = 2554
     private var keyData = MainActivityDataModel()
     private var nfcAdapter: NfcAdapter? = null
     private var pendingNfcIntent: PendingIntent? = null
-    external fun encodeSeed(seed: ByteArray, wordList: Array<String>): ByteArray
-    external fun getSeedFromPhrase(phrase: ByteArray): ByteArray
 
     override fun onFingerprintClick() {
         handler.postDelayed({
@@ -62,6 +64,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 return getString(R.string.BiometricAuthRequest)
             }
             override fun failed() {
+                handler.post { authenticationFailed() }
             }
         })
     }
@@ -110,6 +113,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 return getString(R.string.BiometricAuthRequest)
             }
             override fun failed() {
+                handler.post { authenticationFailed() }
             }
         })
     }
@@ -131,11 +135,17 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
         biometric_switch.isEnabled = BiometricHelper.biometricAvailable(this)
         biometric_switch.isChecked = biometric_switch.isEnabled && BiometricHelper.isBiometricEnabled(this)
         biometric_switch.setOnCheckedChangeListener(this)
+
+        bubble.isChecked = PasswordViewService.isPasswordHelperEnabled(this)
+        bubble.setOnCheckedChangeListener(this)
     }
 
     override fun onResume() {
         super.onResume()
         nfcAdapter?.enableForegroundDispatch(this, pendingNfcIntent, null, null)
+        if (PasswordViewService.isPasswordHelperEnabled(this) && !isAccessibilityEnabled()) {
+            showAccessibilityDialog()
+        }
     }
 
     override fun onPause() {
@@ -164,9 +174,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             val result = intent?.getStringExtra("SCAN_RESULT")
                             result?.let {
                                 if (DigiID.isDigiID(it)) {
-                                    DigiID.digiIDAuthPrompt(this, it, false, keyData)
-                                } else if (DigiPassword.isDigiPassword(it)) {
-                                    DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, false)
+                                    DigiID().digiIDAuthPrompt(this, it, false, keyData)
+                                } else if (DigiPassword().isDigiPassword(it)) {
+                                    DigiPassword().digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, false)
                                 }
                             }
                         }, 500)
@@ -252,17 +262,48 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             }
                         })
                     }
+                    OVERLAY_SETTING -> {
+                        if (Settings.canDrawOverlays(this) && !isAccessibilityEnabled()) {
+                            showAccessibilityDialog();
+                        }
+                    }
                 }
             }
         }
     }
 
+    private fun showAccessibilityDialog() {
+        val builder = AlertDialog.Builder(this@MainActivity)
+        builder.setTitle(R.string.DigiPassword)
+        builder.setIcon(R.drawable.ic_digiid)
+        builder.setMessage(R.string.DigiPasswordAccessibility)
+        builder.setNegativeButton(R.string.Cancel) { dialog, which -> }
+        builder.setPositiveButton(R.string.Go) { dialog, which ->
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+
+        builder.show()
+    }
+
+    private fun isAccessibilityEnabled(): Boolean {
+        val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+        for (enabledService in enabledServices) {
+            val enabledServiceInfo = enabledService.getResolveInfo().serviceInfo
+            if (enabledServiceInfo.packageName.equals(getPackageName()) && enabledServiceInfo.name.equals(Accessibility.name))
+                return true;
+        }
+
+        return false;
+    }
+
     private fun processDeepLink(@Nullable uriString: String?, @Nullable shareUrl: String?) {
         uriString?.let {
             if (DigiID.isDigiID(it)) {
-                DigiID.digiIDAuthPrompt(this, it, true, keyData)
-            } else if (DigiPassword.isDigiPassword(it)) {
-                DigiPassword.digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, true)
+                DigiID().digiIDAuthPrompt(this, it, true, keyData)
+            } else if (DigiPassword().isDigiPassword(it)) {
+                DigiPassword().digiPasswordAuthPrompt(this@MainActivity, keyData.seed, it, true)
             }
         }
         shareUrl?.let {
@@ -279,7 +320,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                             val builder = AlertDialog.Builder(this@MainActivity)
                             builder.setTitle(R.string.DigiPassword)
                             builder.setIcon(R.drawable.ic_digiid)
-                            val password = DigiPassword.getPassword(this@MainActivity, keyData.seed, url, 0)
+                            val password = DigiPassword().getPassword(this@MainActivity, keyData.seed, url, 0)
                             builder.setMessage(password)
                             builder.setNegativeButton(R.string.Copy) { dialog, which ->
                                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -329,7 +370,7 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                 try {
                     val record = String(ndefRecord.payload)
                     if (record.contains("digiid")) {
-                        DigiID.digiIDAuthPrompt(this, record.substring(record.indexOf("digiid")), false, keyData)
+                        DigiID().digiIDAuthPrompt(this, record.substring(record.indexOf("digiid")), false, keyData)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -350,29 +391,43 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     }
 
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        if (!isChecked) {
-            BiometricHelper.processSecurityPolicy(this, object : SecurityPolicyCallback {
-                override fun getDescription(): String {
-                    return getString(R.string.PleaseProvideAuth)
-                }
-
-                override fun getTitle(): String {
-                    return getString(R.string.BiometricAuthRequest)
-                }
-
-                override fun proceed() {
-                    handler.post { BiometricHelper.enableBiometric(this@MainActivity, false) }
-                }
-
-                override fun failed() {
-                    handler.post {
-                        BiometricHelper.enableBiometric(this@MainActivity, true)
-                        biometric_switch.isChecked = true
+        when (buttonView?.id) {
+            R.id.bubble -> {
+                if (isChecked) {
+                    if (!Settings.canDrawOverlays(this)) {
+                        PasswordViewService.showOverlaySettings(this);
+                    } else if (!isAccessibilityEnabled()) {
+                        showAccessibilityDialog();
                     }
                 }
-            })
-        } else {
-            BiometricHelper.enableBiometric(this@MainActivity, isChecked)
+                PasswordViewService.enablePasswordHelper(this, isChecked)
+            }
+            R.id.biometric_switch -> {
+                if (!isChecked) {
+                    BiometricHelper.processSecurityPolicy(this, object : SecurityPolicyCallback {
+                        override fun getDescription(): String {
+                            return getString(R.string.PleaseProvideAuth)
+                        }
+
+                        override fun getTitle(): String {
+                            return getString(R.string.BiometricAuthRequest)
+                        }
+
+                        override fun proceed() {
+                            handler.post { BiometricHelper.enableBiometric(this@MainActivity, false) }
+                        }
+
+                        override fun failed() {
+                            handler.post {
+                                BiometricHelper.enableBiometric(this@MainActivity, true)
+                                biometric_switch.isChecked = true
+                            }
+                        }
+                    })
+                } else {
+                    BiometricHelper.enableBiometric(this@MainActivity, isChecked)
+                }
+            }
         }
     }
 
@@ -382,6 +437,10 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
 
     fun restoreFailedNotification() {
         NotificationFragment.show(this@MainActivity, getString(R.string.RestoreFailed), "", R.raw.error_check) {}
+    }
+
+    fun authenticationFailed() {
+        NotificationFragment.show(this@MainActivity, getString(R.string.AuthFailed), "", R.raw.error_check) {}
     }
 
     fun getProgressBar(): ProgressBar {

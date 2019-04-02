@@ -34,7 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class DigiID {
+public class DigiID extends DigiBase {
     private static final String BITCOIN_SIGNED_MESSAGE_HEADER = "DigiByte Signed Message:\n";
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -51,7 +51,7 @@ public class DigiID {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public static void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, @NonNull MainActivityDataModel keyData) {
+    public void digiIDAuthPrompt(@NonNull final MainActivity context, @NonNull String bitID, boolean isDeepLink, @NonNull MainActivityDataModel keyData) {
         Uri bitUri = Uri.parse(bitID);
         String scheme = "https://";
         BiometricHelper.processSecurityPolicy(context, new SecurityPolicyCallback() {
@@ -59,7 +59,7 @@ public class DigiID {
             public void proceed() {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     Toast.makeText(context, R.string.BiometricAuthSuccessTransmitting, Toast.LENGTH_SHORT).show();
-                    byte[] seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
+                    byte[] seed = getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(keyData.getSeed().getBytes()));
                     digiIDSignAndRespond(context, bitID, isDeepLink, scheme + bitUri.getHost() + bitUri.getPath(), seed);
                 });
             }
@@ -73,7 +73,7 @@ public class DigiID {
             }
             @Override
             public void failed() {
-
+                new Handler(Looper.getMainLooper()).post(context::authenticationFailed);
             }
         });
     }

@@ -1,0 +1,18 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable name="data" type="com.noahseidman.digiid.models.SiteViewModel"/>
+        <variable name="callback" type="com.noahseidman.digiid.listeners.SiteCallback"/>
+    </data>
+
+    <TextView android:foreground="@drawable/ripple_click"
+              android:textColor="#000000"
+              android:textSize="20sp"
+              android:padding="12dp"
+              android:singleLine="true"
+              android:ellipsize="end"
+              android:onClick="@{() -> callback.onClick(data.url)}"
+              android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@{data.url}"
+              android:paddingStart="12dp"/>
+
+</layout>

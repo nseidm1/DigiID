@@ -36,7 +36,7 @@ extern BRWallet *_wallet;
 extern jclass _walletManagerClass;
 
 JNIEXPORT jbyteArray JNICALL
-Java_com_noahseidman_digiid_MainActivity_encodeSeed(JNIEnv *env, jobject thiz,
+Java_com_noahseidman_digiid_utils_DigiBase_encodeSeed(JNIEnv *env, jobject thiz,
                                                        jbyteArray seed,
                                                        jobjectArray stringArray);
 
@@ -199,7 +199,7 @@ JNIEXPORT jstring JNICALL Java_com_noahseidman_digiid_MainActivity_getAuthPublic
         jobject thiz,
         jbyteArray privkey);
 
-JNIEXPORT jstring JNICALL Java_com_noahseidman_digiid_MainActivity_getSeedFromPhrase(
+JNIEXPORT jstring JNICALL Java_com_noahseidman_digiid_utils_SeedUtil_getSeedFromPhrase(
         JNIEnv *env,
         jobject thiz,
         jbyteArray phrase);

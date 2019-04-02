@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import com.noahseidman.digiid.MainActivity
 import com.noahseidman.digiid.interfaces.DataStore
 import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
 import com.noahseidman.digiid.listeners.RestoreListener
@@ -18,7 +17,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
 
     val handler: Handler = Handler(Looper.getMainLooper())
 
-    override fun save(context: MainActivity, saveListener: SaveListener) {
+    override fun save(context: Context, saveListener: SaveListener) {
         FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
             override fun onComplete() {
                 FireBaseUtils.advertisingId?.let {
@@ -78,7 +77,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
         })
     }
 
-    override fun populate(context: MainActivity, restoreListener: RestoreListener) {
+    override fun populate(context: Context, restoreListener: RestoreListener?) {
         FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
             override fun onComplete() {
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -89,27 +88,27 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
                             override fun onProgress(i: Int, l: Long, l1: Long) {}
                             override fun <T> onSuccess(result: T) {
                                 seed = result as String
-                                handler.post { restoreListener.onComplete(seed) }
+                                handler.post { restoreListener?.onComplete(seed) }
                             }
                             override fun onFailure(s: String, e: Exception) {
                                 seed = SeedUtil.generateRandomSeed(context)
                                 save(context, object : SaveListener {
                                     override fun onComplete() {
-                                        handler.post { restoreListener.onComplete(seed) }
+                                        handler.post { restoreListener?.onComplete(seed) }
                                     }
                                     override fun onFailure() {
-                                        handler.post { restoreListener.onFailure() }
+                                        handler.post { restoreListener?.onFailure() }
                                     }
                                 })
                             }
                         })
                     } else {
-                        handler.post { restoreListener.onComplete(seed) }
+                        handler.post { restoreListener?.onComplete(seed) }
                     }
                 }
             }
             override fun onFailure() {
-                restoreListener.onFailure()
+                restoreListener?.onFailure()
             }
         })
     }

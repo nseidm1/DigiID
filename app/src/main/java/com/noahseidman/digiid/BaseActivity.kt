@@ -20,12 +20,6 @@ abstract class BaseActivity : AppCompatActivity(), MainActivityCallback, Fragmen
     val handler: Handler = Handler(Looper.getMainLooper())
     private val backClickListeners = CopyOnWriteArrayList<OnBackPressListener>()
 
-    companion object {
-        init {
-            System.loadLibrary("core-lib")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).callback = this

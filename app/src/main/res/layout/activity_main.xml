@@ -50,10 +50,24 @@
             <ProgressBar android:id="@+id/progress" android:layout_width="wrap_content"
                          android:layout_height="wrap_content" android:indeterminate="true" android:visibility="invisible"/>
 
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center"
+                      android:orientation="horizontal" style="?android:attr/buttonBarStyle">
+
             <androidx.appcompat.widget.SwitchCompat android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:id="@+id/biometric_switch"
                                                     android:text="@string/RequireBiometric"/>
+
+            <LinearLayout android:layout_width="25dp" android:layout_height="0dp"/>
+
+            <androidx.appcompat.widget.SwitchCompat android:layout_width="wrap_content"
+                                                    android:layout_height="wrap_content"
+                                                    android:id="@+id/bubble"
+                                                    android:text="@string/PasswordBubble"/>
+
+        </LinearLayout>
+
+
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                           android:orientation="horizontal" style="?android:attr/buttonBarStyle">

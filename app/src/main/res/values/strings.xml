@@ -1,5 +1,5 @@
 <resources>
-    <string name="name">DigiID</string>
+    <string name="name">DigiID Simple</string>
     <string name="BiometricAuthRequest">Biometric Auth Request</string>
     <string name="BiometricAuthFailure">Please try again</string>
     <string name="BiometricAuthSuccessTransmitting">Auth success, transmitting…</string>
@@ -40,4 +40,11 @@
     <string name="InvalidWebsite">Invalid Website</string>
     <string name="Password">Password</string>
     <string name="InvalidQR">Failed to read QR</string>
+    <string name="AuthFailed">Authentication Failed</string>
+    <string name="PasswordBubble">Password Helper</string>
+    <string name="Enable">Enable</string>
+    <string name="AccessibilityDescription">DigiID Simple uses accessibility to know what password to give you for a specific web page.</string>
+    <string name="DigiPasswordAccessibility">For DigiPassword to auto populate password fields accessibility needs to be enabled. If you do not want to enable accessibility for DigiID Simple, please press cancel and turn off the Password Button feature below.</string>
+    <string name="Go">Go</string>
+    <string name="DigiPasswordWidget">DigiPassword Floating Widget Manager</string>
 </resources>

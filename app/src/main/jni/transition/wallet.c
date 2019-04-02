@@ -187,7 +187,7 @@ static void txDeleted(void *info, UInt256 txHash, int notifyUser, int recommendR
 
 
 JNIEXPORT jbyteArray
-Java_com_noahseidman_digiid_MainActivity_encodeSeed(JNIEnv *env, jobject thiz, jbyteArray seed,
+Java_com_noahseidman_digiid_utils_SeedUtil_encodeSeed(JNIEnv *env, jobject thiz, jbyteArray seed,
                                                        jobjectArray stringArray) {
     __android_log_print(ANDROID_LOG_DEBUG, "Message from C: ", "encodeSeed");
 
@@ -971,7 +971,7 @@ JNIEXPORT jstring JNICALL Java_com_noahseidman_digiid_MainActivity_getAuthPublic
     return (*env)->NewStringUTF(env, base58string);
 }
 
-JNIEXPORT jbyteArray JNICALL Java_com_noahseidman_digiid_MainActivity_getSeedFromPhrase(
+JNIEXPORT jbyteArray JNICALL Java_com_noahseidman_digiid_utils_DigiBase_getSeedFromPhrase(
         JNIEnv *env,
         jobject thiz,
         jbyteArray phrase) {

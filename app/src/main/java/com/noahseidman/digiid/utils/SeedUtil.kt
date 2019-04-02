@@ -1,22 +1,24 @@
 package com.noahseidman.digiid.utils
 
-import com.noahseidman.digiid.MainActivity
+import android.content.Context
 import java.security.SecureRandom
 import java.util.*
 
 object SeedUtil {
 
-    fun generateRandomSeed(ctx: MainActivity): String {
+    external fun encodeSeed(seed: ByteArray, wordList: Array<String>): ByteArray
+
+    fun generateRandomSeed(ctx: Context): String {
         var languageCode: String? = Locale.getDefault().language
         if (languageCode == null) {
             languageCode = "en"
         }
         val list = Bip39Reader.bip39List(ctx, languageCode)
         val randomSeed = SecureRandom().generateSeed(32)
-        return String(ctx.encodeSeed(randomSeed, list.toTypedArray()))
+        return String(encodeSeed(randomSeed, list.toTypedArray()))
     }
 
-    fun getWordList(ctx: MainActivity): List<String> {
+    fun getWordList(ctx: Context): List<String> {
         var languageCode: String? = Locale.getDefault().language
         if (languageCode == null) {
             languageCode = "en"

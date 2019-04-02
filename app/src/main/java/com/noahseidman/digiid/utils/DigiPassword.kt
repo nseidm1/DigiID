@@ -28,7 +28,7 @@ import kotlin.experimental.xor
 import kotlin.math.floor
 
 
-object DigiPassword {
+class DigiPassword: DigiBase() {
 
     fun isDigiPassword(uri: String): Boolean {
         try {
@@ -60,6 +60,7 @@ object DigiPassword {
                     return context.getString(R.string.BiometricAuthRequest)
                 }
                 override fun failed() {
+                    Handler(Looper.getMainLooper()).post { context.authenticationFailed() }
                 }
             })
         } ?: run {
@@ -94,9 +95,9 @@ object DigiPassword {
         }
     }
 
-    fun getPassword(context: MainActivity, seedPhrase: String, domain: String, password_number: Int): String {
+    fun getPassword(context: Context, seedPhrase: String, domain: String, password_number: Int): String {
         //calculate sudo random number
-        val seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
+        val seed = getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
         val address = KeyModel(BRBIP32Sequence.getInstance().bip32PasswordKey(seed, 0, domain, password_number)).address()
         val key = Base58.decode(address)
         val seudoRandom = IntArray(20)
@@ -150,7 +151,7 @@ object DigiPassword {
         val callback = "https://$p"
         Log.d("DigiPassword", callback)
         val config = 3f
-        val seed = context.getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
+        val seed = getSeedFromPhrase(TypesConverter.getNullTerminatedPhrase(seedPhrase.toByteArray()))
         val payload = toUnsignedByteArray(randomSublistWithSpace(Base58.decode(KeyModel(BRBIP32Sequence.getInstance().bip32PasswordKey(seed, 0, domain, password_number)).address())))
         payload[20] = floor(config / 256f).toByte()
         payload[21] = (config % 256f).toByte()
