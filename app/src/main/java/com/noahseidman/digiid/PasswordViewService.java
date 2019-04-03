@@ -11,9 +11,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -30,9 +28,15 @@ import com.noahseidman.digiid.listeners.SiteCallback;
 import com.noahseidman.digiid.models.MainActivityDataModel;
 import com.noahseidman.digiid.models.SiteViewModel;
 import com.noahseidman.digiid.utils.DigiPassword;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -52,12 +56,22 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
     private int topBarsHeight = 0;
 
 
-    public static void show(Context context, AccessibilityNodeInfo nodeInfo, String url) {
+    public static void showWebsite(Context context, AccessibilityNodeInfo nodeInfo, String url) {
         if (Settings.canDrawOverlays(context) && isPasswordHelperEnabled(context)) {
             Intent intent = new Intent(context, PasswordViewService.class);
             intent.putExtra("show", true);
             intent.putExtra("node", nodeInfo);
             intent.putExtra("url", url);
+            context.startService(intent);
+        }
+    }
+
+    public static void showApp(Context context, AccessibilityNodeInfo nodeInfo, String packageName) {
+        if (Settings.canDrawOverlays(context) && isPasswordHelperEnabled(context)) {
+            Intent intent = new Intent(context, PasswordViewService.class);
+            intent.putExtra("show", true);
+            intent.putExtra("node", nodeInfo);
+            intent.putExtra("packageName", packageName);
             context.startService(intent);
         }
     }
@@ -116,6 +130,8 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
         params.y = 0;
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         windowManager.addView(binding.getRoot(), params);
+        binding.getRoot().setVisibility(View.GONE);
+        SHOWING = false;
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         startForeground(NOTIFICATION_ID, createNotification(this));
     }
@@ -129,6 +145,24 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("node")) {
+            node = intent.getParcelableExtra("node");
+        }
+        if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("packageName") && !TextUtils.isEmpty(intent.getStringExtra("packageName"))) {
+            getUrl(intent.getStringExtra("packageName"), url -> {
+                processSiteVariations(url);
+                processShow(intent);
+            });
+        } else if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("url") && !TextUtils.isEmpty(intent.getStringExtra("url"))) {
+            processSiteVariations(intent.getStringExtra("url"));
+            processShow(intent);
+        } else {
+            processShow(intent);
+        }
+        return Service.START_STICKY;
+    }
+
+    private void processShow(Intent intent) {
         if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("show")) {
             if (!intent.getBooleanExtra("show", false)) {
                 binding.getRoot().setVisibility(View.GONE);
@@ -138,22 +172,19 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
                 SHOWING = true;
             }
         }
-        if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("node")) {
-            node = intent.getParcelableExtra("node");
+    }
+
+    private void processSiteVariations(String url) {
+        SiteViewModel[] variations = siteVariations(url);
+        if (!Arrays.equals(variations, this.variations)) {
+            this.variations = variations;
+            binding.recycler.setAdapter(new MultiTypeDataBoundAdapter(this, variations));
+            Rect rect = new Rect();
+            node.getBoundsInScreen(rect);
+            params.x = rect.left;
+            params.y = rect.top;
+            windowManager.updateViewLayout(binding.getRoot(), params);
         }
-        if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("url") && !TextUtils.isEmpty(intent.getStringExtra("url"))) {
-            SiteViewModel[] variations = siteVariations(intent.getStringExtra("url"));
-            if (!Arrays.equals(variations, this.variations)) {
-                this.variations = variations;
-                binding.recycler.setAdapter(new MultiTypeDataBoundAdapter(this, variations));
-                Rect rect = new Rect();
-                node.getBoundsInScreen(rect);
-                params.x = rect.left;
-                params.y = rect.top;
-                windowManager.updateViewLayout(binding.getRoot(), params);
-            }
-        }
-        return Service.START_STICKY;
     }
 
     public static boolean isPasswordHelperEnabled(Context context) {
@@ -287,6 +318,38 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
             }
         }
         return navBarHeight;
+    }
+
+    private void getUrl(String packageName, GetAppUrl getAppUrl) {
+        Executor executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(() -> {
+            try {
+                Document document = Jsoup.connect("https://play.google.com/store/apps/details?id=" + packageName).get();
+                Elements links = document.select("a");
+                for (Element link : links) {
+                    String attribute = link.text();
+                    if(attribute.equalsIgnoreCase("Visit website")){
+                        link.attr("href");
+                        String text = link.attr("href");
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                getAppUrl.getUrl(text);
+                            }
+                        });
+                        return;
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
+
+    interface GetAppUrl {
+        void getUrl(String url);
     }
 
     @Nullable

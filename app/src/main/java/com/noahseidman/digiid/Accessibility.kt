@@ -3,6 +3,7 @@ package com.noahseidman.digiid
 import android.accessibilityservice.AccessibilityService
 import android.annotation.TargetApi
 import android.os.Build
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import java.util.concurrent.Executors
@@ -40,7 +41,9 @@ class Accessibility: AccessibilityService() {
                 nodeSearch(nodeInfo)
             } catch(e: RecursionBreak) { }
             if (node != null && !url.isEmpty()) {
-                PasswordViewService.show(this, node, url)
+                PasswordViewService.showWebsite(this, node, url)
+            } else if (node != null) {
+                PasswordViewService.showApp(this, node, nodeInfo.packageName.toString())
             } else {
                 PasswordViewService.hide(this)
             }
@@ -55,11 +58,11 @@ class Accessibility: AccessibilityService() {
             for (i in 0 until it.childCount) {
                 val childNode = it.getChild(i)
                 childNode?.let {
-                    if (it.text?.toString()?.contains("http", true) == true &&
-                        it.className?.toString()?.contains("edittext", true) == true){
+                    Log.d("Accessibility", it.toString())
+                    if (!it.text.isNullOrEmpty() && it.text.contains("http", true) && it.className.contains("edittext", true)){
                         url = it.text.toString()
                     }
-                    if (it.isPassword && it.isFocused && it.text?.toString()?.isEmpty() == true) {
+                    if ((it.isPassword || (!it.hintText.isNullOrEmpty() && it.hintText.contains("password"))) && it.isFocused && (it.text.isNullOrEmpty() || (!it.text.isNullOrEmpty() && it.text.contains("password", true)))) {
                         node = it
                     }
                     if (node != null && !url.isEmpty()) {
