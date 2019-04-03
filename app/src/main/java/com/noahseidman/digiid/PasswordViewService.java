@@ -164,22 +164,19 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
             node = intent.getParcelableExtra("node");
         }
         if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("packageName") && !TextUtils.isEmpty(intent.getStringExtra("packageName"))) {
-            if (SHOWING) {
-                return Service.START_STICKY;
-            }
-            binding.close.setVisibility(View.VISIBLE);
             getUrl(intent.getStringExtra("packageName"), url -> {
+                binding.close.setVisibility(View.VISIBLE);
                 processSiteVariations(url);
-                promptBiometric(url);
-
+                if (!SHOWING) {
+                    promptBiometric(url);
+                }
             });
         } else if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("url") && !TextUtils.isEmpty(intent.getStringExtra("url"))) {
-            if (SHOWING) {
-                return Service.START_STICKY;
-            }
             binding.close.setVisibility(View.GONE);
             processSiteVariations(intent.getStringExtra("url"));
-            promptBiometric(intent.getStringExtra("url"));
+            if (!SHOWING) {
+                promptBiometric(intent.getStringExtra("url"));
+            }
         } else {
             processShow(intent);
         }
