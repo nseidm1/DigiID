@@ -18,7 +18,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.*;
 import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.Nullable;
@@ -172,11 +171,9 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
     @Override
     public void onClick(String urlVariation) {
         String password = new DigiPassword().getPassword(this, keyData.getSeed(), urlVariation, 0);
-        Log.d("Accessibility", "Retrieve site password: " + password);
         Bundle arguments = new Bundle();
         arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, password);
         node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-        Log.d("Accessibility", "Node: " + node.toString());
         binding.getRoot().setVisibility(View.GONE);
         SHOWING = false;
     }
