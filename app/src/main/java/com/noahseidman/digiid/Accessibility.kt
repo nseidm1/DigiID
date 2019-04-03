@@ -3,7 +3,6 @@ package com.noahseidman.digiid
 import android.accessibilityservice.AccessibilityService
 import android.annotation.TargetApi
 import android.os.Build
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import java.util.concurrent.Executors
@@ -58,7 +57,6 @@ class Accessibility: AccessibilityService() {
             for (i in 0 until it.childCount) {
                 val childNode = it.getChild(i)
                 childNode?.let {
-                    Log.d("Accessibility", it.toString())
                     if (!it.text.isNullOrEmpty() && it.text.contains("http", true) && it.className.contains("edittext", true)){
                         url = it.text.toString()
                     }

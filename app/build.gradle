@@ -11,8 +11,8 @@ android {
         applicationId "com.noahseidman.digiid"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 38
-        versionName "1.0.0.3.7"
+        versionCode 39
+        versionName "1.1.0.0.0"
         testInstrumentationRunner = 'android.support.test.runner.AndroidJUnitRunner'
     }
     dataBinding {
