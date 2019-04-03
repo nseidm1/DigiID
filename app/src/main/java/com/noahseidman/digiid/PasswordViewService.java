@@ -94,6 +94,7 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
         super.onCreate();
         keyData.populate(this, null);
         binding = PasswordViewBinding.inflate(LayoutInflater.from(this));
+        binding.toolbar.setTitleTextColor(getResources().getColor(R.color.black));
         binding.toolbar.setTitle(R.string.name);
         binding.toolbar.setOnTouchListener(this);
         binding.close.setOnClickListener(this);
@@ -101,7 +102,7 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         int OVERLAY_TYPE;
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
-            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_PHONE;
         } else {
             OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         }
@@ -111,7 +112,7 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
                 OVERLAY_TYPE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.TOP | Gravity.LEFT;
+        params.gravity = Gravity.TOP | Gravity.START;
         params.x = 0;
         params.y = 0;
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
