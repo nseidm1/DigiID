@@ -8,7 +8,7 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
+import com.noahseidman.digiid.listeners.OnCompleteListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SaveListener
 import com.pvryan.easycrypt.extensions.asHexString
@@ -26,7 +26,7 @@ class FireBaseUtils {
         var advertisingId: String? = null
 
         fun save(seed: String, context: AppCompatActivity, saveListener: SaveListener) {
-            updateAdId(context, object: OnAdIdUpdateListener {
+            updateAdId(context, object: OnCompleteListener {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
@@ -56,7 +56,7 @@ class FireBaseUtils {
         }
 
         fun restore(context: Context, restoreListener: RestoreListener) {
-            updateAdId(context, object: OnAdIdUpdateListener {
+            updateAdId(context, object: OnCompleteListener {
                 override fun onComplete() {
                     advertisingId?.let {
                         val ref = FirebaseFirestore.getInstance().collection("data").
@@ -79,7 +79,7 @@ class FireBaseUtils {
             })
         }
 
-        fun updateAdId(context: Context, onCompleteListener: OnAdIdUpdateListener) {
+        fun updateAdId(context: Context, onCompleteListener: OnCompleteListener) {
             advertisingId?.let {
                 onCompleteListener.onComplete()
             } ?: run {

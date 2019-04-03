@@ -29,8 +29,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometrics.BiometricPrompt;
-import com.noahseidman.digiid.MainActivity;
 import com.noahseidman.digiid.R;
 import com.noahseidman.digiid.listeners.SecurityPolicyCallback;
 
@@ -62,7 +62,7 @@ public class BiometricHelper extends FingerprintManager.AuthenticationCallback {
         editor.apply();
     }
 
-    public static void processSecurityPolicy(MainActivity context, SecurityPolicyCallback securityPolicyCallback) {
+    public static void processSecurityPolicy(AppCompatActivity context, SecurityPolicyCallback securityPolicyCallback) {
         KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         if (!BiometricHelper.biometricAvailable(context)) {
             if (keyguardManager.isKeyguardSecure()) {

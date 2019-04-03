@@ -54,7 +54,8 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
     private WindowManager windowManager;
     private int navBarHeight = 0;
     private int topBarsHeight = 0;
-
+    Executor executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
 
     public static void showWebsite(Context context, AccessibilityNodeInfo nodeInfo, String url) {
         if (Settings.canDrawOverlays(context) && isPasswordHelperEnabled(context)) {
@@ -72,6 +73,15 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
             intent.putExtra("show", true);
             intent.putExtra("node", nodeInfo);
             intent.putExtra("packageName", packageName);
+            context.startService(intent);
+        }
+    }
+
+    public static void biometricAuth(Context context) {
+        if (Settings.canDrawOverlays(context) && isPasswordHelperEnabled(context)) {
+            Intent intent = new Intent(context, PasswordViewService.class);
+            intent.putExtra("show", true);
+            intent.putExtra("auth", true);
             context.startService(intent);
         }
     }
@@ -145,21 +155,37 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (BiometricActivity.Companion.getCanceled()) {
+            node.performAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+            BiometricActivity.Companion.setCanceled(false);
+            return Service.START_STICKY;
+        }
         if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("node")) {
             node = intent.getParcelableExtra("node");
         }
         if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("packageName") && !TextUtils.isEmpty(intent.getStringExtra("packageName"))) {
+            if (SHOWING) {
+                return Service.START_STICKY;
+            }
             getUrl(intent.getStringExtra("packageName"), url -> {
                 processSiteVariations(url);
-                processShow(intent);
+                promptBiometric(url);
+
             });
         } else if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("url") && !TextUtils.isEmpty(intent.getStringExtra("url"))) {
+            if (SHOWING) {
+                return Service.START_STICKY;
+            }
             processSiteVariations(intent.getStringExtra("url"));
-            processShow(intent);
+            promptBiometric(intent.getStringExtra("url"));
         } else {
             processShow(intent);
         }
         return Service.START_STICKY;
+    }
+
+    private void promptBiometric(String url) {
+        BiometricActivity.Companion.show(this, url);
     }
 
     private void processShow(Intent intent) {
@@ -215,6 +241,7 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
             case R.id.close: {
                 binding.getRoot().setVisibility(View.GONE);
                 node.performAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+                node.performAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
                 SHOWING = false;
             }
         }
@@ -321,31 +348,42 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
     }
 
     private void getUrl(String packageName, GetAppUrl getAppUrl) {
-        Executor executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
         executor.execute(() -> {
-            try {
-                Document document = Jsoup.connect("https://play.google.com/store/apps/details?id=" + packageName).get();
-                Elements links = document.select("a");
-                for (Element link : links) {
-                    String attribute = link.text();
-                    if(attribute.equalsIgnoreCase("Visit website")){
-                        link.attr("href");
-                        String text = link.attr("href");
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                getAppUrl.getUrl(text);
-                            }
-                        });
-                        return;
+            String url = getAppUrl(packageName);
+            if (TextUtils.isEmpty(url)) {
+                try {
+                    Document document = Jsoup.connect("https://play.google.com/store/apps/details?id=" + packageName).get();
+                    Elements links = document.select("a");
+                    for (Element link : links) {
+                        String attribute = link.text();
+                        if(attribute.equalsIgnoreCase("Visit website")){
+                            link.attr("href");
+                            String text = link.attr("href");
+                            saveAppUrl(packageName, text);
+                            handler.post(() -> getAppUrl.getUrl(text));
+                            return;
+                        }
                     }
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
+
+            } else {
+                handler.post(() -> getAppUrl.getUrl(url));
             }
         });
+    }
 
+    private void saveAppUrl(String packageName, String url) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(packageName, url);
+        editor.apply();
+    }
+
+    private String getAppUrl(String packageName) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getString(packageName, "");
     }
 
     interface GetAppUrl {

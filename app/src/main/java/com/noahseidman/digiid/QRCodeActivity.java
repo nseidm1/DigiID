@@ -24,7 +24,7 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.noahseidman.digiid.databinding.ActivityQrCodeBinding;
 import com.noahseidman.digiid.listeners.ActivityQRCodeCallback;
-import com.noahseidman.digiid.listeners.OnAdIdUpdateListener;
+import com.noahseidman.digiid.listeners.OnCompleteListener;
 import com.noahseidman.digiid.listeners.SaveListener;
 import com.noahseidman.digiid.utils.AnimatorHelper;
 import com.noahseidman.digiid.utils.FireBaseUtils;
@@ -129,7 +129,7 @@ public class QRCodeActivity extends AppCompatActivity implements View.OnLongClic
                     break;
                 }
                 case 2: {
-                    FireBaseUtils.Companion.updateAdId(QRCodeActivity.this, new OnAdIdUpdateListener() {
+                    FireBaseUtils.Companion.updateAdId(QRCodeActivity.this, new OnCompleteListener() {
                         @Override
                         public void onComplete() {
                             if (FireBaseUtils.Companion.getAdvertisingId() != null) {

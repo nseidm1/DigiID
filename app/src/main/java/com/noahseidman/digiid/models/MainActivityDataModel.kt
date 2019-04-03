@@ -5,7 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
 import com.noahseidman.digiid.interfaces.DataStore
-import com.noahseidman.digiid.listeners.OnAdIdUpdateListener
+import com.noahseidman.digiid.listeners.OnCompleteListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SaveListener
 import com.noahseidman.digiid.utils.FireBaseUtils
@@ -18,7 +18,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
     val handler: Handler = Handler(Looper.getMainLooper())
 
     override fun save(context: Context, saveListener: SaveListener) {
-        FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
+        FireBaseUtils.updateAdId(context, object : OnCompleteListener {
             override fun onComplete() {
                 FireBaseUtils.advertisingId?.let {
                     val eCryptSymmetric = ECSymmetric()
@@ -54,7 +54,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
         editor.putString("seed", seed)
         editor.apply()
         val eCryptSymmetric = ECSymmetric()
-        FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
+        FireBaseUtils.updateAdId(context, object : OnCompleteListener {
             override fun onComplete() {
                 FireBaseUtils.advertisingId?.let {
                     eCryptSymmetric.decrypt(seed, it, object : ECResultListener {
@@ -78,7 +78,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
     }
 
     override fun populate(context: Context, restoreListener: RestoreListener?) {
-        FireBaseUtils.updateAdId(context, object : OnAdIdUpdateListener {
+        FireBaseUtils.updateAdId(context, object : OnCompleteListener {
             override fun onComplete() {
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val eCryptSymmetric = ECSymmetric()

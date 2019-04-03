@@ -1,6 +1,6 @@
 package com.noahseidman.digiid.listeners
 
-interface OnAdIdUpdateListener {
+interface OnCompleteListener {
     fun onComplete()
     fun onFailure()
 }
