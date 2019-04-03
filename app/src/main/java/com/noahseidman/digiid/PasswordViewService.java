@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 /**
  * ChatHead Service
  */
-public class PasswordViewService extends Service implements SiteCallback, View.OnClickListener, View.OnTouchListener {
+public class PasswordViewService extends Service implements SiteCallback, View.OnTouchListener {
 
     private PasswordViewBinding binding;
     private AccessibilityNodeInfo node;
@@ -120,8 +120,6 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
         binding.toolbar.setTitleTextColor(getResources().getColor(R.color.black));
         binding.toolbar.setTitle(R.string.name);
         binding.toolbar.setOnTouchListener(this);
-        binding.close.setOnClickListener(this);
-        binding.content.setOnClickListener(this);
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         int OVERLAY_TYPE;
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
@@ -233,18 +231,6 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
         node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
         binding.getRoot().setVisibility(View.GONE);
         SHOWING = false;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.close: {
-                binding.getRoot().setVisibility(View.GONE);
-                node.performAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
-                node.performAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
-                SHOWING = false;
-            }
-        }
     }
 
     private static Notification createNotification(Context context) {

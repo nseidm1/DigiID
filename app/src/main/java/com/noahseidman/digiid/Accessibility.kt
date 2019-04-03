@@ -57,7 +57,8 @@ class Accessibility: AccessibilityService() {
             for (i in 0 until it.childCount) {
                 val childNode = it.getChild(i)
                 childNode?.let {
-                    if (!it.text.isNullOrEmpty() && it.text.contains("http", true) && it.className.contains("edittext", true)){
+                    // Find the first field with http in it. Should be the url bar
+                    if (url.isEmpty() && !it.text.isNullOrEmpty() && it.text.contains("http", true)){
                         url = it.text.toString()
                     }
                     if ((it.isPassword || (!it.hintText.isNullOrEmpty() && it.hintText.contains("password"))) && it.isFocused && (it.text.isNullOrEmpty() || (!it.text.isNullOrEmpty() && it.text.contains("password", true)))) {
