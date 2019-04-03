@@ -155,8 +155,9 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (BiometricActivity.Companion.getCanceled()) {
+            node.performAction(AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
             node.performAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
-            BiometricActivity.Companion.setCanceled(false);
+            handler.postDelayed(() -> BiometricActivity.Companion.setCanceled(false), 500);
             return Service.START_STICKY;
         }
         if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey("node")) {
