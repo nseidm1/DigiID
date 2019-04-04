@@ -47,4 +47,8 @@
     <string name="DigiPasswordAccessibility">For DigiPassword to auto populate password fields accessibility needs to be enabled. If you do not want to enable accessibility for DigiID Simple, please press cancel and turn off the Password Button feature below.</string>
     <string name="Go">Go</string>
     <string name="DigiPasswordWidget">DigiPassword Floating Widget Manager</string>
+    <string name="Phrase">Phrase</string>
+    <string name="ClickYourWords">Click your words...</string>
+    <string name="InvalidSeed">Please double check your seed, tested invalid...</string>
+    <string name="Back">Back</string>
 </resources>

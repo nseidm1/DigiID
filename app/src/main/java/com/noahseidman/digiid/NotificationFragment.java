@@ -3,6 +3,7 @@ package com.noahseidman.digiid;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.noahseidman.digiid.databinding.FragmentNotificationBinding;
-import com.noahseidman.digiid.listeners.SignalCompleteCallback;
+import com.noahseidman.digiid.listeners.DialogCompleteCallback;
 import com.noahseidman.digiid.listeners.OnBackPressListener;
 import com.noahseidman.digiid.models.FragmentSignalViewModel;
 import com.noahseidman.digiid.utils.AnimatorHelper;
@@ -21,15 +22,15 @@ import org.jetbrains.annotations.NotNull;
 public class NotificationFragment extends Fragment implements OnBackPressListener {
     private static final String TAG = NotificationFragment.class.getName();
 
-    private static final String TITLE = "title";
+    protected static final String TITLE = "title";
     private static final String ICON_DESCRIPTION = "iconDescription";
     private static final String RES_ID = "resId";
-    private SignalCompleteCallback completion;
-    private FragmentNotificationBinding binding;
+    private DialogCompleteCallback completion;
+    protected ViewGroup background;
 
     public static void show(AppCompatActivity activity, String title,
                             String iconDescription,
-                            int drawableId, SignalCompleteCallback completion) {
+                            int drawableId, DialogCompleteCallback completion) {
         NotificationFragment fragmentSignal = new NotificationFragment();
         Bundle bundle = new Bundle();
         bundle.putString(NotificationFragment.TITLE, title);
@@ -47,7 +48,8 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
 
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
-        binding = FragmentNotificationBinding.inflate(inflater);
+        FragmentNotificationBinding binding = FragmentNotificationBinding.inflate(inflater);
+        background = binding.background;
         FragmentSignalViewModel viewModel = new FragmentSignalViewModel();
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -67,19 +69,29 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ObjectAnimator colorFade = AnimatorHelper.animateBackgroundDim(binding.background, false, null);
+        if (background == null) {
+            throw new IllegalArgumentException("Set the background ViewGroup in implementing class");
+        }
+        ObjectAnimator colorFade = AnimatorHelper.animateBackgroundDim(background, false, null);
         colorFade.setStartDelay(350);
         colorFade.setDuration(500);
         colorFade.start();
     }
 
-    private void setCompletion(SignalCompleteCallback completion) {
+    protected void setCompletion(DialogCompleteCallback completion) {
         this.completion = completion;
+    }
+
+    protected boolean autoDismiss() {
+        return true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (!autoDismiss()) {
+            return;
+        }
         new Handler().postDelayed(() -> {
             try {
                 if (getActivity() != null)
@@ -91,17 +103,16 @@ public class NotificationFragment extends Fragment implements OnBackPressListene
         }, 2000);
     }
 
-    private void fadeOutRemove() {
-        ObjectAnimator colorFade = AnimatorHelper.animateBackgroundDim(binding.background, true,
-                () -> {
-                    new Handler().postDelayed(() -> {
-                        if (completion != null) {
-                            completion.onComplete();
-                            completion = null;
-                        }
-                    }, 300);
-                    remove();
-                });
+    protected void fadeOutRemove() {
+        ObjectAnimator colorFade = AnimatorHelper.animateBackgroundDim(background, true, () -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (completion != null) {
+                    completion.onComplete();
+                    completion = null;
+                }
+                }, 300);
+            remove();
+        });
         colorFade.start();
     }
 

@@ -17,7 +17,7 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
 
     val handler: Handler = Handler(Looper.getMainLooper())
 
-    override fun save(context: Context, saveListener: SaveListener) {
+    override fun save(context: Context, saveListener: SaveListener?) {
         FireBaseUtils.updateAdId(context, object : OnCompleteListener {
             override fun onComplete() {
                 FireBaseUtils.advertisingId?.let {
@@ -29,16 +29,16 @@ data class MainActivityDataModel(var seed: String = String()) : DataStore {
                             val editor = prefs.edit()
                             editor.putString("seed", result as String)
                             editor.apply()
-                            saveListener.onComplete()
+                            saveListener?.onComplete()
                         }
                         override fun onFailure(s: String, e: Exception) {
-                            saveListener.onFailure()
+                            saveListener?.onFailure()
                         }
                     })
                 }
             }
             override fun onFailure() {
-                saveListener.onFailure()
+                saveListener?.onFailure()
             }
         })
     }

@@ -120,7 +120,7 @@ JNIEXPORT void JNICALL Java_com_noahseidman_digiid_MainActivity_walletFreeEveryt
                                                                                         jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_com_noahseidman_digiid_MainActivity_validateRecoveryPhrase(JNIEnv *env, jobject obj,
+Java_com_noahseidman_digiid_PhraseRestore_validateRecoveryPhrase(JNIEnv *env, jobject obj,
                                                                    jobjectArray stringArray,
                                                                    jstring jPhrase);
 

@@ -27,6 +27,7 @@ import com.google.common.io.ByteStreams
 import com.google.common.net.InternetDomainName
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
+import com.noahseidman.digiid.interfaces.ISetData
 import com.noahseidman.digiid.listeners.DataLoadListener
 import com.noahseidman.digiid.listeners.RestoreListener
 import com.noahseidman.digiid.listeners.SecurityPolicyCallback
@@ -37,7 +38,10 @@ import java.io.InputStream
 import java.util.*
 
 
-class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
+class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener, ISetData {
+    override fun setData(model: MainActivityDataModel) {
+        keyData = model
+    }
 
     private val SELECT_IMAGE_RESTORE = 4334
     private val FIREBASE_RESTORE = 32443
@@ -72,10 +76,11 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
     private fun showRestoreDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.Options)
-        val items = arrayOfNulls<CharSequence>(3)
+        val items = arrayOfNulls<CharSequence>(4)
         items[0] = getString(R.string.Scan)
         items[1] = getString(R.string.Image)
         items[2] = getString(R.string.Google)
+        items[3] = getString(R.string.Phrase)
         builder.setItems(items) { dialog, item ->
             when (item) {
                 0 -> {
@@ -93,6 +98,9 @@ class MainActivity : BaseActivity(), CompoundButton.OnCheckedChangeListener {
                         AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build(),
                         FIREBASE_RESTORE
                     )
+                }
+                3 -> {
+                    PhraseRestore.show(this, null)
                 }
             }
         }

@@ -638,7 +638,7 @@ Java_com_noahseidman_digiid_MainActivity_walletFreeEverything(JNIEnv *env, jobje
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_noahseidman_digiid_MainActivity_validateRecoveryPhrase(JNIEnv *env, jobject obj,
+Java_com_noahseidman_digiid_PhraseRestore_validateRecoveryPhrase(JNIEnv *env, jobject obj,
                                                                    jobjectArray stringArray,
                                                                    jstring jPhrase) {
     __android_log_print(ANDROID_LOG_DEBUG, "Message from C: ", "validateRecoveryPhrase");

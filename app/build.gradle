@@ -11,8 +11,8 @@ android {
         applicationId "com.noahseidman.digiid"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 41
-        versionName "1.1.0.0.2"
+        versionCode 42
+        versionName "1.1.1.0.0"
         testInstrumentationRunner = 'android.support.test.runner.AndroidJUnitRunner'
     }
     dataBinding {
@@ -110,4 +110,5 @@ dependencies {
     }
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
     implementation 'org.jsoup:jsoup:1.11.1'
+    implementation 'com.github.Trendyol:BubbleScrollBar:0.1'
 }

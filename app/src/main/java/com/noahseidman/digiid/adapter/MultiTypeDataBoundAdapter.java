@@ -52,6 +52,13 @@ public class MultiTypeDataBoundAdapter extends BaseDataBoundAdapter {
         }
     }
 
+    public MultiTypeDataBoundAdapter(ActionCallback actionCallback, List<Object> items) {
+        mActionCallback = actionCallback;
+        if (null != items) {
+            mItems = items;
+        }
+    }
+
     @Override
     protected void bindItem(DataBoundViewHolder holder, int position, List payloads) {
         Object item = mItems.get(position);
