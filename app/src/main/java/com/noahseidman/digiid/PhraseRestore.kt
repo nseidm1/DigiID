@@ -108,7 +108,7 @@ class PhraseRestore: NotificationFragment(), PhraseCallback, TextWatcher, View.O
     }
 
     fun processSeed(s: String) {
-        if (validateRecoveryPhrase(words.toTypedArray(), s.trim())) {
+        if (validateRecoveryPhrase(words.toTypedArray(), s.trim()) && getSeedLength() == 24) {
             val model = MainActivityDataModel(s.trim())
             val handler = Handler(Looper.getMainLooper())
             context?.let {

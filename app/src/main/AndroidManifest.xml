@@ -53,7 +53,7 @@
         </activity>
         <activity android:excludeFromRecents="true"
                   android:name=".QRCodeActivity"
-                  android:theme="@style/Theme.AppCompat.Translucent"/>
+                  android:theme="@style/Theme.AppCompat.Translucent.QRCodeActivity"/>
         <activity android:name="com.google.zxing.client.android.encode.EncodeActivity"
                   android:screenOrientation="portrait"
                   tools:node="replace"/>
