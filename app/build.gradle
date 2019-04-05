@@ -11,8 +11,8 @@ android {
         applicationId "com.noahseidman.digiid"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 43
-        versionName "1.1.1.0.1"
+        versionCode 44
+        versionName "1.1.1.0.2"
         testInstrumentationRunner = 'android.support.test.runner.AndroidJUnitRunner'
     }
     dataBinding {
@@ -111,4 +111,5 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
     implementation 'org.jsoup:jsoup:1.11.1'
     implementation 'com.github.Trendyol:BubbleScrollBar:0.1'
+    compile 'com.github.dan-td:snappy-recyclerview:1.0.2'
 }

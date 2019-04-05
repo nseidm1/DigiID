@@ -11,23 +11,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.noahseidman.digiid.adapter.MultiTypeDataBoundAdapter
 import com.noahseidman.digiid.databinding.FragmentPhraseRestoreBinding
 import com.noahseidman.digiid.interfaces.ISetData
 import com.noahseidman.digiid.listeners.DialogCompleteCallback
 import com.noahseidman.digiid.listeners.PhraseCallback
 import com.noahseidman.digiid.listeners.SaveListener
+import com.noahseidman.digiid.models.LetterColumnViewModel
 import com.noahseidman.digiid.models.MainActivityDataModel
 import com.noahseidman.digiid.models.PhraseViewModel
 import com.noahseidman.digiid.utils.SeedUtil
-import com.trendyol.bubblescrollbarlib.BubbleTextProvider
 import kotlinx.android.synthetic.main.fragment_phrase_restore.*
-
-
 
 class PhraseRestore: NotificationFragment(), PhraseCallback, TextWatcher, View.OnClickListener {
 
+    private lateinit var binding: FragmentPhraseRestoreBinding
+    private val letters = arrayOf("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")
     private lateinit var words: List<String>
     external fun validateRecoveryPhrase(words: Array<String>, phrase: String): Boolean
 
@@ -69,17 +68,30 @@ class PhraseRestore: NotificationFragment(), PhraseCallback, TextWatcher, View.O
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding: FragmentPhraseRestoreBinding = FragmentPhraseRestoreBinding.inflate(inflater)
+        binding = FragmentPhraseRestoreBinding.inflate(inflater)
         context?.let {
             words = SeedUtil.getWordList(it)
-            val phrases: ArrayList<Any> = ArrayList()
-            for (word in words) { phrases.add(PhraseViewModel(word)) }
-            binding.recycler.layoutManager = LinearLayoutManager(it)
-            binding.recycler.adapter = MultiTypeDataBoundAdapter(this, phrases)
 
-            binding.bubbleScrollBar.attachToRecyclerView(binding.recycler)
-            binding.bubbleScrollBar.bubbleTextProvider = BubbleTextProvider { words[it] }
+            val letterColumns = ArrayList<Any>()
+            var startIndex = 0
+            for (i in 0 until letters.size) {
 
+                val columnWords = ArrayList<Any>()
+
+                for (p in startIndex until words.size) {
+                    if (words.get(p).toLowerCase().startsWith(letters.get(i))) {
+                        columnWords.add(PhraseViewModel(words.get(p)))
+                    } else {
+                        startIndex = p + 1
+                        if (columnWords.size > 0) {
+                            letterColumns.add(LetterColumnViewModel(MultiTypeDataBoundAdapter(this, columnWords)))
+                        }
+                        break
+                    }
+                }
+            }
+
+            binding.recycler.adapter = MultiTypeDataBoundAdapter(this, letterColumns)
             binding.phrase.addTextChangedListener(this)
             binding.back.setOnClickListener(this)
         }
@@ -87,6 +99,12 @@ class PhraseRestore: NotificationFragment(), PhraseCallback, TextWatcher, View.O
         background = binding.background
         binding.background.setOnClickListener(this)
         return binding.root;
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        binding.recycler.scrollBy(100, 0)
+
     }
 
     override fun afterTextChanged(s: Editable?) {
