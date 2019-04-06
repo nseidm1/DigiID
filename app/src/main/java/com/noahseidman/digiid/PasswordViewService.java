@@ -102,13 +102,17 @@ public class PasswordViewService extends Service implements SiteCallback, View.O
 
     private SiteViewModel[] siteVariations(String url) {
         Uri uri = Uri.parse(url);
-        final InternetDomainName name = InternetDomainName.from(uri.getHost()).topPrivateDomain();
         ArrayList<SiteViewModel> variations = new ArrayList();
-        String[] splits = name.toString().split("\\.");
-        if (splits.length > 0) {
-            variations.add(new SiteViewModel(splits[0]));
+        if (uri.getHost() != null) {
+            final InternetDomainName name = InternetDomainName.from(uri.getHost()).topPrivateDomain();
+            String[] splits = name.toString().split("\\.");
+            if (splits.length > 0) {
+                variations.add(new SiteViewModel(splits[0]));
+            }
+            variations.add(new SiteViewModel(name.toString()));
+        } else {
+            variations.add(new SiteViewModel(url));
         }
-        variations.add(new SiteViewModel(name.toString()));
         return variations.toArray(new SiteViewModel[0]);
     }
 
