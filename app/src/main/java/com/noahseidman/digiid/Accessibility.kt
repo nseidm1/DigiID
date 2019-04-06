@@ -61,7 +61,7 @@ class Accessibility: AccessibilityService() {
                     if (url.isEmpty() && !it.text.isNullOrEmpty() && it.text.contains("http", true)){
                         url = it.text.toString()
                     }
-                    if ((it.isPassword || (!it.hintText.isNullOrEmpty() && it.hintText.contains("password"))) && it.isFocused && (it.text.isNullOrEmpty() || (!it.text.isNullOrEmpty() && it.text.contains("password", true)))) {
+                    if ((it.isPassword || (hasHintText() && !it.hintText.isNullOrEmpty() && it.hintText.contains("password"))) && it.isFocused && (it.text.isNullOrEmpty() || (!it.text.isNullOrEmpty() && it.text.contains("password", true)))) {
                         node = it
                     }
                     if (node != null && !url.isEmpty()) {
@@ -72,5 +72,17 @@ class Accessibility: AccessibilityService() {
                 }
             }
         }
+    }
+    var hasHintText: Boolean? = null
+    fun hasHintText(): Boolean {
+        if (hasHintText == null) {
+            try {
+                AccessibilityNodeInfo::class.java.getMethod("getHintText", *(null as Array<Class<*>>?)!!)
+                hasHintText = true
+            } catch (e: Throwable) {
+                hasHintText = false;
+            }
+        }
+        return hasHintText!!
     }
 }
